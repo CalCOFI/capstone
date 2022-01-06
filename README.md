@@ -1,8 +1,8 @@
 # CalCOFI22
 Capstone project for CCDSP fellowship, where we will store data and code
 ## Basic Basics
-* `git clone https://github.com/ucsbdeepspace/sdi_pipeline` make a local copy of the pipeline
-* `git pull` (from inside pipeline dir): sync local copy with remote copy
+* `git clone <url>` make a local copy of the pipeline
+* `git pull`: sync local copy with remote copy
 * `git add </path/to/file>` add changes in file to current commit-tracked changes
 * `git commit` commit all tracked changes as one "unit" of work
 * `git push` sync local commits with remote host
