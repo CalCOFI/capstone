@@ -1,7 +1,9 @@
 # CalCOFI22
-Capstone project for CCDSP fellowship, where we will store data and code
+Capstone project for CCDSP fellowship, where we will store data and code <br>
 Data sets visual from Erin:
 ![image](https://user-images.githubusercontent.com/30590837/149233121-d5e2e83e-b72a-41e5-9e83-00ef40877b43.png)
+<br>
+Bottle in the image refers to the bottle dataset on https://wp.calcofi.org/wp/data/oceanographic-data/bottle-database/
 ## Basic Basics
 * `git clone <url>` make a local copy of the pipeline
 * `git pull`: sync local copy with remote copy
