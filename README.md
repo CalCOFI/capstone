@@ -6,7 +6,8 @@ Data sets visual from Erin: <br>
 Bottle in the image refers to the bottle dataset on https://wp.calcofi.org/wp/data/oceanographic-data/bottle-database/
 
 <br>
-How casting is done:<br>
+How casting is done: <br>
+
 ![image](https://user-images.githubusercontent.com/30590837/149233368-01275c98-ef42-46bf-8d36-31a8d14f5392.png)
 <br>
 ## Basic Basics
