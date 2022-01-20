@@ -5,6 +5,7 @@ Spyder Editor
 This is a temporary script file.
 """
 import pandas as pd
+import numpy as np
 
 data = pd.read_csv('C:/Users/prera/Documents/GitHub/CalCOFI22/dataset_to_use/CalCOFI_Database_194903-202001_csv_22Sep2021/194903-202001_Bottle.csv')
 df = pd.DataFrame(data)
@@ -13,7 +14,7 @@ df = pd.DataFrame(data)
 
 #df.dropna results in an empty table
 #First, only keeping the columns we want
-table = df[['Btl_Cnt', 'Cst_Cnt','Depth_ID','Depthm','T_degC','O2ml_L','R_Depth']]
+table = df[['Btl_Cnt', 'Cst_Cnt','Depth_ID','Depthm','T_degC','O2ml_L','R_Depth','Salnty','pH1','pH2']]
 #[889500 rows x 6 columns]
 #R_Temp not found in index
 
@@ -27,9 +28,10 @@ table = df[['Btl_Cnt', 'Cst_Cnt','Depth_ID','Depthm','T_degC','O2ml_L','R_Depth'
 #Doing it the first way
 cast_data = pd.DataFrame(pd.read_csv('C:/Users/prera/Documents/GitHub/CalCOFI22/cast_table.csv'))
 combined = pd.merge(table, cast_data, how="left", on="Cst_Cnt")
-cut_by_date = combined.dropna()
+indices = np.where(combined['Year']==2000)
+cut_by_date = combined.loc[min(indices[0]):]
 #Keys are now: ['Btl_Cnt', 'Cst_Cnt', 'Depth_ID', 'Depthm', 'T_degC', 'O2ml_L','R_Depth', 'Unnamed: 0', 'Cast_ID', 'Quarter', 'Date', 'Year', 'Month', 'Lat_Dec', 'Lon_Dec']
 
 #finally cut down by depth. We only want surface measurements for now
 final = cut_by_date.loc[cut_by_date['Depthm']==0]
-final.to_csv()
+#final.to_csv()
