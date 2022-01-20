@@ -26,12 +26,12 @@ table = df[['Btl_Cnt', 'Cst_Cnt','Depth_ID','Depthm','T_degC','O2ml_L','R_Depth'
 #str(table['Depth_ID'][889499][:2])+str(table['Depth_ID'][889499][3:7])
 
 #Doing it the first way
-cast_data = pd.DataFrame(pd.read_csv('C:/Users/prera/Documents/GitHub/CalCOFI22/cast_table.csv'))
+cast_data = pd.DataFrame(pd.read_csv('C:/Users/prera/Documents/GitHub/CalCOFI22/cast_table (1).csv'))
 combined = pd.merge(table, cast_data, how="left", on="Cst_Cnt")
 indices = np.where(combined['Year']==2000)
 cut_by_date = combined.loc[min(indices[0]):]
 #Keys are now: ['Btl_Cnt', 'Cst_Cnt', 'Depth_ID', 'Depthm', 'T_degC', 'O2ml_L','R_Depth', 'Unnamed: 0', 'Cast_ID', 'Quarter', 'Date', 'Year', 'Month', 'Lat_Dec', 'Lon_Dec']
 
 #finally cut down by depth. We only want surface measurements for now
-final = cut_by_date.loc[cut_by_date['Depthm']==0]
+#final = cut_by_date.loc[cut_by_date['Depthm']==0]
 #final.to_csv()
