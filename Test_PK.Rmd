@@ -1,9 +1,0 @@
----
-title: "Test_PK"
-author: "PK"
-date: "1/5/2022"
-output: html_document
----
-```{r}
-print("Hello World")
-```
