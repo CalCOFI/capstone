@@ -1,0 +1,93 @@
+---
+title: "teresa_test_plot"
+author: "Teresa Gonzalez"
+date: "1/26/2022"
+output: html_document
+---
+
+###Set up 
+
+####Load Libraries
+```{r}
+library(readr)
+library(ggplot2)
+library(tidyverse)
+library(sf)
+```
+
+####Read in Files 
+```{r}
+cast_bottle <- read_csv("data/bottle_and_cast.csv")
+descrip <- read_csv("data/Bottle Field Descriptions (1).csv")
+```
+
+```{r}
+sal_tem_o2 <- cast_bottle %>% 
+  select(T_degC, Salnty, O2ml_L, Depthm, Btl_Cnt, Cast_ID, Year) %>% 
+  pivot_longer(1:3, names_to = "Variable", values_to = "Data")
+```
+
+
+###Creating Graphs 
+
+####Graph of Salinity, Temperature, and Oxygen vs Depth 
+```{r}
+sal_tem_o2_vs_depth <- ggplot(data = sal_tem_o2, aes(x = Data, y = Depthm)) + 
+  geom_point(aes(color = Variable)) + 
+  scale_color_manual(values = c("darkred", "steelblue", "darkgreen")) + 
+  scale_y_reverse()
+  
+  
+sal_tem_o2_vs_depth
+
+# panel of graphs instead of all on same/ diff scales? 
+#time and space? 
+```
+Temperature and O2 both decrease with depth. 
+
+
+####Graph of Year vs Oxygen 
+```{r}
+
+#multiple sampling in a year, first make an ave, (use day, month, hour), use just one depth, or location 
+
+year_o2_plot <- ggplot(data = cast_bottle, aes(x = Year, y = O2ml_L, group = )) + 
+  geom_line() + 
+  scale_color_manual(values = c("darkred", "steelblue", "darkgreen"))
+  
+
+year_o2_plot
+```
+Oxygen not decreasing with time? 
+
+
+####Graph of pH vs Depth 
+```{r}
+
+#all Na's for depth with this current data, not much to do with pH right now 
+ph1_vs_depth <- ggplot(data = cast_bottle, aes(x = pH1, y = Depthm)) + 
+  geom_line()
+  
+ph1_vs_depth
+```
+####Looking into map making in R 
+```{r}
+#map making in R 
+#possible use of tmap? 
+
+#need a geographic shape of California and off the coast 
+#probably find this online 
+
+#can use conus to attach US map boundaries to data? Need to attach states to the cast_bottle data 
+#maybe better to work with long and lat instead 
+
+#definitely want to keep looking at this 
+
+
+
+
+plot(st_geometry())
+
+```
+
+
