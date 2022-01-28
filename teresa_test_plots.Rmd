@@ -9,22 +9,35 @@ output: html_document
 
 ####Load Libraries
 ```{r}
+#read in data 
 library(readr)
+#plotting 
 library(ggplot2)
 library(tidyverse)
+#geometries for mapping 
 library(sf)
+#arranging plots in panel
+library(ggpubr)
 ```
 
 ####Read in Files 
 ```{r}
+#cast and bottle preprocessed data 
 cast_bottle <- read_csv("data/bottle_and_cast.csv")
+
+#descriptions of the variables in the cast and bottle preprocessed data 
 descrip <- read_csv("data/Bottle Field Descriptions (1).csv")
 ```
 
 ```{r}
+
+#creating a new dataframe from the cast_bottle preprocessed data 
 sal_tem_o2 <- cast_bottle %>% 
+#selecting only temp, salinity, oxygen, depth, bottle id, cast id, year for new dataframe
   select(T_degC, Salnty, O2ml_L, Depthm, Btl_Cnt, Cast_ID, Year) %>% 
-  pivot_longer(1:3, names_to = "Variable", values_to = "Data")
+#making a longer dataframe and putting temp, salinity, oxygen into a column called variable 
+#and the values into a column called values 
+  pivot_longer(1:3, names_to = "Variable", values_to = "Value")
 ```
 
 
@@ -32,18 +45,59 @@ sal_tem_o2 <- cast_bottle %>%
 
 ####Graph of Salinity, Temperature, and Oxygen vs Depth 
 ```{r}
-sal_tem_o2_vs_depth <- ggplot(data = sal_tem_o2, aes(x = Data, y = Depthm)) + 
+#creating a plot from the new dataframe with the salinity, temp, oxygen -> variable column 
+sal_tem_o2_vs_depth <- ggplot(data = sal_tem_o2, aes(x = Value, y = Depthm)) + 
+#putting everything into one graph and color coding by what type of variable 
   geom_point(aes(color = Variable)) + 
   scale_color_manual(values = c("darkred", "steelblue", "darkgreen")) + 
+#reversing the y-axis so it resembles a thermocline graph 
   scale_y_reverse()
   
-  
+
 sal_tem_o2_vs_depth
 
 # panel of graphs instead of all on same/ diff scales? 
 #time and space? 
+
+
+
 ```
 Temperature and O2 both decrease with depth. 
+
+####Graph of salinity, temp, oxygen panels 
+```{r}
+#salinity plot 
+salinity_plot <- ggplot() + 
+#putting everything into one graph and color coding by what type of variable 
+  geom_line(data = cast_bottle, aes(x = Salnty, y = Depthm)) + 
+  scale_y_reverse()
+
+salinity_plot
+
+
+#temperature plot 
+temp_plot <- ggplot() + 
+#putting everything into one graph and color coding by what type of variable 
+  geom_line(data = cast_bottle, aes(x = T_degC, y = Depthm)) + 
+  scale_y_reverse()
+
+temp_plot
+
+#oxygen plot 
+o2_plot <- ggplot() + 
+#putting everything into one graph and color coding by what type of variable 
+  geom_line(data = cast_bottle, aes(x = O2ml_L, y = Depthm)) + 
+  scale_y_reverse()
+
+o2_plot
+
+#panel of graphs
+
+ggarrange(salinity_plot, temp_plot, o2_plot, 
+          ncol = 3)
+
+```
+
 
 
 ####Graph of Year vs Oxygen 
@@ -82,8 +136,6 @@ ph1_vs_depth
 #maybe better to work with long and lat instead 
 
 #definitely want to keep looking at this 
-
-
 
 
 plot(st_geometry())
