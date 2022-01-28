@@ -14,10 +14,13 @@ library(readr)
 #plotting 
 library(ggplot2)
 library(tidyverse)
-#geometries for mapping 
-library(sf)
+#mapping 
+library(sp)
+#geometries for mapping
+library(maps)
 #arranging plots in panel
 library(ggpubr)
+library(leaflet)
 ```
 
 ####Read in Files 
@@ -137,8 +140,11 @@ ph1_vs_depth
 
 #definitely want to keep looking at this 
 
+basemap <- leaflet() %>% setView(lng = -119.4179, lat = 36.7783, zoom = 5.3) %>%
+  addTiles()
 
-plot(st_geometry())
+
+basemap
 
 ```
 
