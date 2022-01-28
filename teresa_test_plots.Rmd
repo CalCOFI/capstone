@@ -140,7 +140,7 @@ basemap <- leaflet() %>%
   addCircleMarkers(
     lat = station_avg$mean_lat, 
     lng = station_avg$mean_long, 
-    label = "Station", 
+    label = station_avg$Sta_ID, 
     color = "red", 
     radius = 0.6)
   
