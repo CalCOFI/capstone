@@ -95,7 +95,7 @@ o2_plot
 
 #panel of graphs
 
-ggarrange(salinity_plot, temp_plot, o2_plot, 
+sal_temp_o2_grid <- ggarrange(salinity_plot, temp_plot, o2_plot, 
           ncol = 3)
 
 ```
