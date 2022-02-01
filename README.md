@@ -44,3 +44,7 @@ The **<<<** indicates the parts of the **original** file that are in conflict <b
 The **>>>** indicates the **changes you made** that are in conflict with the original file <br>
 The **==** separates the two <br>
 To fix this, you will have to manually edit the file so that your changes are included and work. Remove the <<<, ==, and >>> lines after you are done. Then the commit will work.
+
+
+
+
