@@ -1,0 +1,132 @@
+---
+title: "station_line_test_plot"
+author: "Mallika Gupta"
+date: "2/9/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+###Set up 
+
+####Load Libraries
+```{r}
+#read in data 
+library(readr)
+#plotting 
+library(ggplot2)
+library(tidyverse)
+#arranging plots in panel
+library(ggpubr)
+#creating interactive maps in R 
+library(leaflet)
+#splitting and averaging by unique values
+library(data.table)
+```
+
+####Read in Files 
+```{r}
+#cast and bottle preprocessed data 
+cast_bottle <- read_csv("data/bottle_and_cast.csv", show_col_types = FALSE)
+cast_bottle
+
+#descriptions of the variables in the cast and bottle preprocessed data 
+descrip <- read_csv("data/Bottle Field Descriptions (1).csv", show_col_types = FALSE)
+```
+
+
+####Subset data set to look at particular station across quarters in 2000
+
+```{r}
+# cast_bottle$Sta_ID %>% substr(1, 5)=="093.3"  # determining how to select for line number within Station ID
+# cast_bottle$Date == "01/07/2000"  # determining how to select for line number within Station ID
+#  #Alternative subsetting method
+# line_93.3 <- subset(cast_bottle, substr(cast_bottle$Sta_ID, 1, 5)=="093.3", select= c(Date, Depthm, O2ml_L))
+
+## Quarter 1
+line_93.3_2000_1 <- cast_bottle[which(substr(cast_bottle$Sta_ID, 1, 5)=="093.3" & cast_bottle$Quarter == 1 & cast_bottle$Year == 2000),] %>%
+  mutate(Station = Sta_ID %>% substr(7, 11)) # Adding separate column with station number
+
+# Data frame with all observations from line 93.3 in Quarter 1 of 2000 
+line_93.3_2000_1  
+
+
+## Quarter 2
+line_93.3_2000_2 <- cast_bottle[which(substr(cast_bottle$Sta_ID, 1, 5)=="093.3" & cast_bottle$Quarter == 2 & cast_bottle$Year == 2000),] %>%
+  mutate(Station = Sta_ID %>% substr(7, 11)) # Adding separate column with station number
+
+# Data frame with all observations from line 93.3 in Quarter 1 of 2000 
+line_93.3_2000_2  
+
+
+## Quarter 3
+line_93.3_2000_3 <- cast_bottle[which(substr(cast_bottle$Sta_ID, 1, 5)=="093.3" & cast_bottle$Quarter == 3 & cast_bottle$Year == 2000),] %>%
+  mutate(Station = Sta_ID %>% substr(7, 11)) # Adding separate column with station number
+
+# Data frame with all observations from line 93.3 in Quarter 1 of 2000 
+line_93.3_2000_3
+
+
+## Quarter 4
+line_93.3_2000_4 <- cast_bottle[which(substr(cast_bottle$Sta_ID, 1, 5)=="093.3" & cast_bottle$Quarter == 4 & cast_bottle$Year == 2000),] %>%
+  mutate(Station = Sta_ID %>% substr(7, 11)) # Adding separate column with station number
+
+# Data frame with all observations from line 93.3 in Quarter 1 of 2000 
+line_93.3_2000_4
+```
+###Creating Graphs 
+
+```{r}
+# Graphing oxygen concentration at different depths for each station line through different quarters of 2000
+station_93.3_2000_1_slice <- line_93.3_2000_1 %>%
+  ggplot(aes(x = Station, y = -Depthm)) +
+  geom_point(aes(color = O2ml_L), size = 3)
+station_93.3_2000_1_slice
+
+station_93.3_2000_2_slice <- line_93.3_2000_2 %>%
+  ggplot(aes(x = Station, y = -Depthm)) +
+  geom_point(aes(color = O2ml_L), size = 3)
+station_93.3_2000_2_slice
+
+station_93.3_2000_3_slice <- line_93.3_2000_3 %>%
+  ggplot(aes(x = Station, y = -Depthm)) +
+  geom_point(aes(color = O2ml_L), size = 3)
+station_93.3_2000_3_slice
+
+station_93.3_2000_4_slice <- line_93.3_2000_4 %>%
+  ggplot(aes(x = Station, y = -Depthm)) +
+  geom_point(aes(color = O2ml_L), size = 3)
+station_93.3_2000_4_slice
+```
+Above graphs bring up question about our data: why are there fewer stations sampled alone line 93.3 in the 3rd quarter than the others? Also seems like the granularity of depth was much higher in quarter 2 than the others (can tell from table dimensions).
+
+
+```{r, fig.width = 6, fig.height = 10}
+# Attempting to use facet_wrap
+line_93.3_2000_slices <- cast_bottle[which(substr(cast_bottle$Sta_ID, 1, 5)=="093.3" & cast_bottle$Year == 2000),] %>%
+  mutate(Station = Sta_ID %>% substr(7, 11)) %>% # Adding separate column with station number 
+  pivot_longer(cols = Quarter) %>%
+  ggplot(aes(x = Station, y = -Depthm)) +
+  geom_point(aes(color = O2ml_L), size = 3) +
+  facet_wrap(~ value, nrow = 4, scales = "free")
+
+line_93.3_2000_slices
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
