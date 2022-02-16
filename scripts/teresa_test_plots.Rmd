@@ -25,7 +25,7 @@ library(data.table)
 ####Read in Files 
 ```{r}
 #cast and bottle preprocessed data 
-cast_bottle <- read_csv("data/bottle_and_cast.csv")
+cast_bottle <- read_csv("data/preprocessed/bottle_and_cast.csv")
 
 #descriptions of the variables in the cast and bottle preprocessed data 
 descrip <- read_csv("data/Bottle Field Descriptions (1).csv")
