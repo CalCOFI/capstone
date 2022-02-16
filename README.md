@@ -1,5 +1,6 @@
 # CalCOFI22
 Capstone project for CCDSP fellowship, where we will store data and code <br>
+Link to CalCOFI website:  https://wp.calcofi.org/wp/data/oceanographic-data/bottle-database/ <br>
 Data sets visual from Erin: <br>
 ![image](https://user-images.githubusercontent.com/30590837/149233121-d5e2e83e-b72a-41e5-9e83-00ef40877b43.png)
 <br>
