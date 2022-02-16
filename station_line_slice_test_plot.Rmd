@@ -45,82 +45,107 @@ descrip <- read_csv("data/Bottle Field Descriptions (1).csv", show_col_types = F
 #  #Alternative subsetting method
 # line_93.3 <- subset(cast_bottle, substr(cast_bottle$Sta_ID, 1, 5)=="093.3", select= c(Date, Depthm, O2ml_L))
 
-## Quarter 1
-line_93.3_2000_1 <- cast_bottle[which(substr(cast_bottle$Sta_ID, 1, 5)=="093.3" & cast_bottle$Quarter == 1 & cast_bottle$Year == 2000),] %>%
-  mutate(Station = Sta_ID %>% substr(7, 11)) # Adding separate column with station number
-
-# Data frame with all observations from line 93.3 in Quarter 1 of 2000 
-line_93.3_2000_1  
-
-
-## Quarter 2
-line_93.3_2000_2 <- cast_bottle[which(substr(cast_bottle$Sta_ID, 1, 5)=="093.3" & cast_bottle$Quarter == 2 & cast_bottle$Year == 2000),] %>%
-  mutate(Station = Sta_ID %>% substr(7, 11)) # Adding separate column with station number
-
-# Data frame with all observations from line 93.3 in Quarter 1 of 2000 
-line_93.3_2000_2  
-
-
-## Quarter 3
-line_93.3_2000_3 <- cast_bottle[which(substr(cast_bottle$Sta_ID, 1, 5)=="093.3" & cast_bottle$Quarter == 3 & cast_bottle$Year == 2000),] %>%
-  mutate(Station = Sta_ID %>% substr(7, 11)) # Adding separate column with station number
-
-# Data frame with all observations from line 93.3 in Quarter 1 of 2000 
-line_93.3_2000_3
-
-
-## Quarter 4
-line_93.3_2000_4 <- cast_bottle[which(substr(cast_bottle$Sta_ID, 1, 5)=="093.3" & cast_bottle$Quarter == 4 & cast_bottle$Year == 2000),] %>%
-  mutate(Station = Sta_ID %>% substr(7, 11)) # Adding separate column with station number
-
-# Data frame with all observations from line 93.3 in Quarter 1 of 2000 
-line_93.3_2000_4
+# ## Quarter 1
+# line_93.3_2000_1 <- cast_bottle[which(substr(cast_bottle$Sta_ID, 1, 5)=="093.3" & cast_bottle$Quarter == 1 & cast_bottle$Year == 2000),] %>%
+#   mutate(Station = Sta_ID %>% substr(7, 11)) # Adding separate column with station number
+# 
+# # Data frame with all observations from line 93.3 in Quarter 1 of 2000 
+# line_93.3_2000_1  
+# 
+# 
+# ## Quarter 2
+# line_93.3_2000_2 <- cast_bottle[which(substr(cast_bottle$Sta_ID, 1, 5)=="093.3" & cast_bottle$Quarter == 2 & cast_bottle$Year == 2000),] %>%
+#   mutate(Station = Sta_ID %>% substr(7, 11)) # Adding separate column with station number
+# 
+# # Data frame with all observations from line 93.3 in Quarter 1 of 2000 
+# line_93.3_2000_2  
+# 
+# 
+# ## Quarter 3
+# line_93.3_2000_3 <- cast_bottle[which(substr(cast_bottle$Sta_ID, 1, 5)=="093.3" & cast_bottle$Quarter == 3 & cast_bottle$Year == 2000),] %>%
+#   mutate(Station = Sta_ID %>% substr(7, 11)) # Adding separate column with station number
+# 
+# # Data frame with all observations from line 93.3 in Quarter 1 of 2000 
+# line_93.3_2000_3
+# 
+# 
+# ## Quarter 4
+# line_93.3_2000_4 <- cast_bottle[which(substr(cast_bottle$Sta_ID, 1, 5)=="093.3" & cast_bottle$Quarter == 4 & cast_bottle$Year == 2000),] %>%
+#   mutate(Station = Sta_ID %>% substr(7, 11)) # Adding separate column with station number
+# 
+# # Data frame with all observations from line 93.3 in Quarter 1 of 2000 
+# line_93.3_2000_4
 ```
 ###Creating Graphs 
 
 ```{r}
 # Graphing oxygen concentration at different depths for each station line through different quarters of 2000
-station_93.3_2000_1_slice <- line_93.3_2000_1 %>%
-  ggplot(aes(x = Station, y = -Depthm)) +
-  geom_point(aes(color = O2ml_L), size = 3)
-station_93.3_2000_1_slice
-
-station_93.3_2000_2_slice <- line_93.3_2000_2 %>%
-  ggplot(aes(x = Station, y = -Depthm)) +
-  geom_point(aes(color = O2ml_L), size = 3)
-station_93.3_2000_2_slice
-
-station_93.3_2000_3_slice <- line_93.3_2000_3 %>%
-  ggplot(aes(x = Station, y = -Depthm)) +
-  geom_point(aes(color = O2ml_L), size = 3)
-station_93.3_2000_3_slice
-
-station_93.3_2000_4_slice <- line_93.3_2000_4 %>%
-  ggplot(aes(x = Station, y = -Depthm)) +
-  geom_point(aes(color = O2ml_L), size = 3)
-station_93.3_2000_4_slice
+# station_93.3_2000_1_slice <- line_93.3_2000_1 %>%
+#   ggplot(aes(x = Station, y = -Depthm)) +
+#   geom_point(aes(color = O2ml_L), size = 3)
+# station_93.3_2000_1_slice
+# 
+# station_93.3_2000_2_slice <- line_93.3_2000_2 %>%
+#   ggplot(aes(x = Station, y = -Depthm)) +
+#   geom_point(aes(color = O2ml_L), size = 3)
+# station_93.3_2000_2_slice
+# 
+# station_93.3_2000_3_slice <- line_93.3_2000_3 %>%
+#   ggplot(aes(x = Station, y = -Depthm)) +
+#   geom_point(aes(color = O2ml_L), size = 3)
+# station_93.3_2000_3_slice
+# 
+# station_93.3_2000_4_slice <- line_93.3_2000_4 %>%
+#   ggplot(aes(x = Station, y = -Depthm)) +
+#   geom_point(aes(color = O2ml_L), size = 3)
+# station_93.3_2000_4_slice
 ```
-Above graphs bring up question about our data: why are there fewer stations sampled alone line 93.3 in the 3rd quarter than the others? Also seems like the granularity of depth was much higher in quarter 2 than the others (can tell from table dimensions).
 
 
-```{r, fig.width = 8, fig.height = 5}
-# Attempting to use facet_wrap
+```{r, fig.width = 8, fig.height = 10}
+# Cleaning up code by using facet_wrap
 line_93.3_2000_slices <- cast_bottle[which(substr(cast_bottle$Sta_ID, 1, 5)=="093.3" & cast_bottle$Year == 2000),] %>%
   mutate(Station = Sta_ID %>% substr(7, 11)) %>% # Adding separate column with station number 
   pivot_longer(cols = Quarter) %>%
   ggplot(aes(x = Station, y = -Depthm)) +
   geom_point(aes(color = O2ml_L), size = 3) +
-  facet_wrap(~ value, nrow = 2, scales = "free_x") +
-  labs(x = "Station", y = "Depth (m)")
+  facet_wrap(~ value, nrow = 4, scales = "free_x") +
+  labs(x = "Station", y = "Depth (m)") 
 
 line_93.3_2000_slices
 ```
 
 
+# Questions
+Above graphs bring up question about our data: why are there fewer stations sampled alone line 93.3 in the 3rd quarter than the others? 
+  - Also seems like the granularity of depth was much higher in quarter 2 than the others (can tell from table dimensions). 
+Maybe we consider using "Distance - Nautical miles from coast intercept, calculated from estimated latitude and longitude" instead of station line here so we can see a scaled representation of how this points are distanced from the coastline
+  - Could bring up problems in representation since latitude and longitude aren't exactly on top of the station line (but could also make the visualization more accurate + sacirficing the straight lines along station numbers isn't that bad)
+  
+  
+Add some transformation of the y-axis?
+Color scale can be also be subjected to transformation to bring out detail in the different ranges of oxygen - could also be adjusted by the thresholds
+Flip the color scale to have light colors for low oxygen concentration
+There are a lot of default color scales: sequential, diverging, 3 color sequential ones etc.
+Scales package could allow custon transformations to be used in ggplot
+Check: ggplot2 - scale_fill_gradient or scale_color_gradient?
+
+Diverging gradient around the threshold - red values for under the threshold and diverges again for higher values of oxygen
 
 
+```{r,  fig.width = 8, fig.height = 10}
+#line: 	076.7
+# Cleaning up code by using facet_wrap
+line_076.7_2000_slices <- cast_bottle[which(substr(cast_bottle$Sta_ID, 1, 5)=="076.7" & cast_bottle$Year == 2000),] %>%
+  mutate(Station = Sta_ID %>% substr(7, 11)) %>% # Adding separate column with station number 
+  pivot_longer(cols = Quarter) %>%
+  ggplot(aes(x = Station, y = -Depthm)) +
+  geom_point(aes(color = O2ml_L), size = 3) +
+  facet_wrap(~ value, nrow = 4, scales = "free_x") +
+  labs(x = "Station", y = "Depth (m)")
 
-
+line_076.7_2000_slices
+```
 
 
 

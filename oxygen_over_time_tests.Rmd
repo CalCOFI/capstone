@@ -1,0 +1,56 @@
+---
+title: "Oxygen over time graphs"
+author: "Mallika Gupta"
+date: "2/9/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+###Set up 
+
+####Load Libraries
+```{r}
+#read in data 
+library(readr)
+#plotting 
+library(ggplot2)
+library(tidyverse)
+#arranging plots in panel
+library(ggpubr)
+#creating interactive maps in R 
+library(leaflet)
+#splitting and averaging by unique values
+library(data.table)
+```
+
+####Read in Files 
+```{r}
+#cast and bottle preprocessed data 
+cast_bottle <- read_csv("data/bottle_and_cast.csv", show_col_types = FALSE)
+cast_bottle
+
+#descriptions of the variables in the cast and bottle preprocessed data 
+descrip <- read_csv("data/Bottle Field Descriptions (1).csv", show_col_types = FALSE)
+```
+
+
+#Oxygen over time graph in one location
+```{r}
+station_093.3026.7 <- cast_bottle[which(cast_bottle$Sta_ID == "093.3 026.7", cast_bottle$Depthm == 0), ] %>%
+  mutate(Date = as.Date(Date,
+                        format = "%Y/%m/%d"))
+
+oxygen_over_time <- station_093.3026.7 %>%
+  ggplot(aes(x = Date, y = O2ml_L)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 90, 
+                                   vjust = 0.25,
+                                   hjust = 1)) # rotates and aligns labels
+
+oxygen_over_time
+```
+
+
