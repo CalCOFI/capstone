@@ -25,7 +25,7 @@ library(data.table)
 ####Read in Files 
 ```{r}
 #cast and bottle preprocessed data 
-cast_bottle <- read_csv("data/bottle_and_cast.csv")
+cast_bottle <- read_csv("data/preprocessed/bottle_and_cast.csv")
 
 #descriptions of the variables in the cast and bottle preprocessed data 
 descrip <- read_csv("data/Bottle Field Descriptions (1).csv")
@@ -48,73 +48,55 @@ sal_tem_o2 <- cast_bottle %>%
 ####Graph of Salinity, Temperature, and Oxygen vs Depth 
 ```{r}
 #creating a plot from the new dataframe with the salinity, temp, oxygen -> variable column 
-#sal_tem_o2_vs_depth <- ggplot(data = sal_tem_o2, aes(x = Value, y = Depthm)) + 
+sal_tem_o2_vs_depth <- ggplot(data = sal_tem_o2, aes(x = Value, y = Depthm)) + 
 #putting everything into one graph and color coding by what type of variable 
- # geom_point(aes(color = Variable)) + 
- # scale_color_manual(values = c("darkred", "steelblue", "darkgreen")) + 
-#reversing the y-axis so it resembles a thermocline graph 
-  #scale_y_reverse()
-  
-
-#sal_tem_o2_vs_depth
-
-
-#long_avg <- setDT(cast_bottle)[, .(mean_long = mean(Lon_Dec)), by = Sta_ID]
-#temp_avg <- setDT(cast_bottle)[, .(mean_temp = mean(T_degC)), by = Sta_ID]
-#depth_avg <- setDT(cast_bottle)[, .(mean_depth = mean(Depthm)), by = Sta_ID]
-
-
-#av_cast_bottle <- data.frame(long_avg, temp_avg, depth_avg)
-
-cross_section <- ggplot() + 
-#putting everything into one graph and color coding by what type of variable 
-  geom_point(data = cast_bottle, aes(x = Lon_Dec, y = Depthm, colour = T_degC), size = 0.75) + 
- scale_color_gradientn(colours = rainbow(5), trans = 'reverse') +
+  geom_point(aes(color = Variable)) + 
+  scale_color_manual(values = c("darkred", "steelblue", "darkgreen")) + 
 #reversing the y-axis so it resembles a thermocline graph 
   scale_y_reverse()
   
-cross_section
 
+sal_tem_o2_vs_depth
 
 # panel of graphs instead of all on same/ diff scales? 
 #time and space? 
 
 
 
-
 ```
+Temperature and O2 both decrease with depth. 
 
 ####Graph of salinity, temp, oxygen panels 
 ```{r}
 #salinity plot 
-#salinity_plot <- ggplot() + 
+salinity_plot <- ggplot() + 
 #putting everything into one graph and color coding by what type of variable 
-  #geom_line(data = cast_bottle, aes(x = Salnty, y = Depthm)) + 
-  #scale_y_reverse()
+  geom_line(data = cast_bottle, aes(x = Salnty, y = Depthm)) + 
+  scale_y_reverse()
 
-#salinity_plot
+salinity_plot
 
 
 #temperature plot 
-#temp_plot <- ggplot() + 
+temp_plot <- ggplot() + 
 #putting everything into one graph and color coding by what type of variable 
- # geom_line(data = cast_bottle, aes(x = T_degC, y = Depthm)) + 
- # scale_y_reverse()
+  geom_line(data = cast_bottle, aes(x = T_degC, y = Depthm)) + 
+  scale_y_reverse()
 
-#temp_plot
+temp_plot
 
 #oxygen plot 
-#o2_plot <- ggplot() + 
+o2_plot <- ggplot() + 
 #putting everything into one graph and color coding by what type of variable 
- # geom_line(data = cast_bottle, aes(x = O2ml_L, y = Depthm)) + 
- # scale_y_reverse()
+  geom_line(data = cast_bottle, aes(x = O2ml_L, y = Depthm)) + 
+  scale_y_reverse()
 
-#o2_plot
+o2_plot
 
 #panel of graphs
 
-#sal_temp_o2_grid <- ggarrange(salinity_plot, temp_plot, o2_plot, 
-          #ncol = 3)
+sal_temp_o2_grid <- ggarrange(salinity_plot, temp_plot, o2_plot, 
+          ncol = 3)
 
 ```
 
@@ -125,12 +107,12 @@ cross_section
 
 #multiple sampling in a year, first make an ave, (use day, month, hour), use just one depth, or location 
 
-#year_o2_plot <- ggplot(data = cast_bottle, aes(x = Year, y = O2ml_L, group = )) + 
-  #geom_line() + 
-  #scale_color_manual(values = c("darkred", "steelblue", "darkgreen"))
+year_o2_plot <- ggplot(data = cast_bottle, aes(x = Year, y = O2ml_L, group = )) + 
+  geom_line() + 
+  scale_color_manual(values = c("darkred", "steelblue", "darkgreen"))
   
 
-#year_o2_plot
+year_o2_plot
 ```
 Oxygen not decreasing with time? 
 
@@ -139,21 +121,15 @@ Oxygen not decreasing with time?
 ```{r}
 
 #all Na's for depth with this current data, not much to do with pH right now 
-#ph1_vs_depth <- ggplot(data = cast_bottle, aes(x = pH1, y = Depthm)) + 
-  #geom_line()
+ph1_vs_depth <- ggplot(data = cast_bottle, aes(x = pH1, y = Depthm)) + 
+  geom_line()
   
-#ph1_vs_depth
+ph1_vs_depth
 ```
 ####Looking into map making in R 
 ```{r}
 #take the averages of the lat/long for each station 
 station_avg <- setDT(cast_bottle)[, .(mean_lat = mean(Lat_Dec), mean_long = mean(Lon_Dec)), by = Sta_ID]
-
-
-#create station descriptions for the label
-#Station ID: lat, long, depth range, marine protected area? Spatial importance?, sample frequency (maybe color schematic (only two frequencies: 2, 4))
-stat_desc <- sprintf(station_avg$Sta_ID, 
-               station_avg$mean_lat, station_avg$mean_long)
 
 #create a base map using leaflet 
 basemap <- leaflet() %>% 
@@ -164,7 +140,7 @@ basemap <- leaflet() %>%
   addCircleMarkers(
     lat = station_avg$mean_lat, 
     lng = station_avg$mean_long, 
-    label = stat_desc, 
+    label = station_avg$Sta_ID, 
     color = "red", 
     radius = 0.6)
   
