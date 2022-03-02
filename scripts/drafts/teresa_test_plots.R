@@ -47,7 +47,7 @@ load('data/processed/bottle-cast-recent.RData')
 
 bottle %>% 
   rename(depth = Depthm) %>%
-  filter(Year > 2018, depth < 500) %>%
+  filter(Year == 2010, depth < 500, Quarter == 3) %>%
   select(T_degC, Salnty, O2ml_L,
          depth, Btl_Cnt, Cast_ID,
          Year) %>% 
@@ -56,12 +56,16 @@ bottle %>%
                values_to = "value") %>%
   ggplot(aes(x = value, y = depth,
              group = interaction(Cast_ID, measurement))) +
-  geom_path(alpha = 0.05) +
+  geom_path(alpha = 0.1) +
   scale_y_reverse() +
   facet_wrap(~ measurement, 
              nrow = 1, 
              scales = 'free_x')
 
+ggsave(filename = 'tdr-drafts/figures/clines-2010-q3.png', 
+       width = 8, 
+       height = 6, 
+       units = 'in')
 
 
 
@@ -123,20 +127,57 @@ ph1_vs_depth
 #take the averages of the lat/long for each station 
 station_avg <- setDT(cast_bottle)[, .(mean_lat = mean(Lat_Dec), mean_long = mean(Lon_Dec)), by = Sta_ID]
 
-#create a base map using leaflet 
-basemap <- leaflet() %>% 
+yr <- 2010
+
+station_info <- cast_bottle %>%
+  filter(Year == yr) %>%
+  # coerce date to datetime
+  mutate(date = mdy(Date)) %>%
+  # select spatiotemporal info and oxygen columns
+  select(Lat_Dec, 
+         Lon_Dec, 
+         Depthm, 
+         Sta_ID,
+         date) %>%
+  # better names
+  rename(id = Sta_ID,
+         lat = Lat_Dec,
+         lon = Lon_Dec,
+         depth = Depthm) %>%
+  distinct() %>%
+  # split id into line and station
+  separate(id, c('line', 'station'), sep = ' ') %>%
+  # aggregate by station and line
+  group_by(line, station) %>%
+  summarize(lat = mean(lat),
+            lon = mean(lon),
+            maxdepth = max(depth), 
+            n = n_distinct(date)) %>%
+  ungroup()
+
+station_info %>%
+  mutate(label_line1 = paste('Line ID', line, sep = ' '),
+         label_line2 = paste('Station ID', station, sep = ' '),
+         label_line3 = paste('Max depth', maxdepth, sep = ' '),
+         label_line4 = paste('Visited', n, 'time(s)', sep = ' ')) %>%
+  unite(label,
+        contains('label'),
+        sep = ' <br/> ') %>%
+  select(-contains('label_line')) %>%
+  leaflet() %>% 
 #set the latitude and longitude for California, zoom into desired area 
-  setView(lng = -119.4179, lat = 36.7783, zoom = 5.3) %>%
+  setView(lng = mean(station_info$lon), 
+          lat = mean(station_info$lat), 
+          zoom = 5) %>%
 #add markers for each of the stations average lat and long 
-  addTiles() %>%
+  addProviderTiles(providers$Esri.OceanBasemap) %>%
   addCircleMarkers(
-    lat = station_avg$mean_lat, 
-    lng = station_avg$mean_long, 
-    label = station_avg$Sta_ID, 
+    lat = ~lat, 
+    lng = ~lon, 
+    popup = ~label, 
     color = "red", 
     radius = 0.6)
   
-basemap
 
 
 

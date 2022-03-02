@@ -22,28 +22,48 @@ You can embed Shiny inputs and outputs in your document. Outputs are automatical
 
 library(shiny)
 library(leaflet)
+#read in data 
+library(readr)
+#plotting 
+library(ggplot2)
+library(tidyverse)
+#arranging plots in panel
+library(ggpubr)
+#creating interactive maps in R 
+library(leaflet)
+#splitting and averaging by unique values
+library(data.table)
 
-ui<- fluidPage(
-  leafletOutput("mymap"),
-  p()
-)
+cast_bottle <- read_csv("data/processed/bottle_and_cast.csv", show_col_types = FALSE)
 
-server <- function(input, output) {
-  
-  output$mymap <- renderLeaflet({
-    leaflet() %>% 
-  setView(lng = -119.4179, lat = 36.7783, zoom = 5.3) %>%
+#take the averages of the lat/long for each station 
+station_avg <- setDT(cast_bottle)[, .(mean_lat = mean(Lat_Dec), mean_long = mean(Lon_Dec)), by = Sta_ID]
+
+#create a base map using leaflet 
+basemap <- leaflet() %>% 
+#set the latitude and longitude for California, zoom into desired area 
+setView(lng = -119.4179, lat = 36.7783, zoom = 5.3) %>%
+#add markers for each of the stations average lat and long 
   addTiles() %>%
   addCircleMarkers(
     lat = station_avg$mean_lat, 
-    lng = station_avg$mean_long, 
+    lng = station_avg$mean_long,
     label = station_avg$Sta_ID, 
     color = "red", 
-    radius = 0.6)
-  })
-}
+    radius = 0.6
+    )
 
-shinyApp(ui = ui, server = server)
+ui<- fluidPage(
+  leafletOutput("mymap"),
+  h1("Map of Stations off of California Coast"),
+  h3("Hovering over each point displays the latitude and longitude of that particular station.")
+)
+
+server <- function(input, output, session) {
+  output$mymap <- renderLeaflet({basemap})
+} 
+
+shinyApp(ui,server)
 ```
 
 

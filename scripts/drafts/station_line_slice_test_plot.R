@@ -70,8 +70,8 @@ cast_bottle <- bottle
 #   geom_point(aes(color = O2ml_L), size = 3)
 # station_93.3_2000_1_slice 
 
-yr <- 2000
-qr <- 1
+yr <- 2010
+qr <- 3
 ln <- "093.3"
 
 cast_bottle %>%
@@ -83,7 +83,7 @@ cast_bottle %>%
          Quarter == qr,
          line == ln) %>%
   # bin depths into roughly even numbers of observations
-  mutate(depth_interval = cut_number(Depthm, 15)) %>%
+  mutate(depth_interval = cut_number(Depthm, 10)) %>%
   # aggregate within depth bins
   group_by(depth_interval, 
            station) %>%
@@ -104,6 +104,11 @@ cast_bottle %>%
                                    vjust = 0.5),
         panel.grid = element_blank()) +
   labs(x = 'station id', y = 'depth') 
+
+ggsave(filename = 'tdr-drafts/figures/line-profile-2010-q3.png', 
+       width = 4, 
+       height = 4, 
+       units = 'in')
 
 # 
 # station_93.3_2000_2_slice <- line_93.3_2000_2 %>%

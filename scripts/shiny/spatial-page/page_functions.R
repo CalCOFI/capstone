@@ -1,0 +1,139 @@
+library(leaflet)
+library(sp)
+library(scales)
+library(htmltools)
+library(tidyverse)
+library(lubridate)
+load('data/processed/bottle.RData')
+bottle <- bottle %>% filter(year(date) >= 2010)
+
+## -----------------------------
+## SPATIAL PAGE
+
+# map data for a year
+get_map_data <- function(yr, qr){
+  ## note: for each date & station, usually only one set of coordinates recorded
+  ## i.e. no lat/long variation across depths, with rare but extant exceptions
+  
+  # station locations
+  station_locations <- bottle %>%
+    # select location info
+    select(lat, 
+           lon, 
+           line, 
+           station,
+           date) %>%
+    # unique sampling locations
+    distinct(date, line, station, lat, lon) %>%
+    # find average location and variation for each station
+    group_by(line, station) %>%
+    summarize(across(.cols = c(lat, lon), 
+                     .fns = list(ctr = mean, 
+                                 var = var)),
+              .groups = 'drop') %>%
+    mutate(loc_se = sqrt(lat_var + lon_var))
+  
+  out <- bottle %>%
+    # filter to specified year
+    filter(year(date) == yr,
+           quarter == qr) %>%
+    # select spatiotemporal info
+    select(depth, 
+           line,
+           station,
+           date) %>%
+    # find maximum depth measured that year and number of visits
+    group_by(line, station) %>%
+    summarize(maxdepth = max(depth), .groups = 'drop') %>%
+    ungroup() %>%
+    # merge station info (center lat and long)
+    full_join(station_locations, by = c('line', 'station')) %>%
+    # define indicator for whether a station was sampled
+    mutate(sampled_ix = is.na(maxdepth)) %>%
+    # create labels to display on hover
+    mutate(label_line1 = paste('Line ID', line, sep = ' '),
+           label_line2 = paste('Station ID', station, sep = ' '),
+           label_line3 = paste('Max depth', maxdepth, sep = ' ')) %>%
+    unite(label,
+          contains('label'),
+          sep = ' <br/> ') %>%
+    select(-contains('label_line'))
+  
+  return(out)
+}
+
+# leaflet-specific
+point_color_fn <- colorFactor(c('#B73407', '#393939'), 
+                              c(T, F))
+
+# lines <- bottle %>% pull(line) %>% unique()
+
+# generate base map layer
+make_basemap <- function(){
+  leaflet() %>% 
+  setView(lng = -121.33940, 
+          lat = 33.94975, 
+          zoom = 5) %>%
+  addProviderTiles(providers$Esri.OceanBasemap)
+}
+
+# add points to map
+update_basemap <- function(basemap, filtered_data){
+  basemap %>%
+  clearMarkers() %>%
+  addCircleMarkers(lat = ~lat_ctr, 
+                   lng = ~lon_ctr, 
+                   popup = ~label, 
+                   color = ~point_color_fn(sampled_ix),
+                   radius = ~ -log(loc_se),
+                   data = filtered_data)
+}
+
+# custom transformation for depth profiles
+rev_sqrt <- trans_new('revsqrt', 
+                      function(x) -sqrt(x),
+                      function(x) x^2,
+                      breaks = breaks_log(n = 5, base = 10))
+
+# depth profiles
+make_profile <- function(yr, qr){
+  bottle %>% 
+    filter(year(date) == yr,
+           quarter == qr) %>%
+    select(oxygen, 
+           salinity, 
+           temperature, 
+           depth, 
+           cast) %>%
+    pivot_longer(1:3, 
+                 names_to = "measurement", 
+                 values_to = "value") %>%
+    ggplot(aes(x = value, y = depth,
+               group = interaction(cast, measurement))) +
+    geom_path(alpha = 0.1) +
+    scale_y_continuous(trans = rev_sqrt) +
+    facet_wrap(~ measurement,
+               nrow = 1,
+               scales = 'free_x') +
+    geom_hline(yintercept = 0) +
+    labs(x = '') +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 90, 
+                                     size = 8, 
+                                     vjust = 0.5),
+          axis.text.y = element_text(size = 8))
+}
+
+save(
+  list = ls(),
+  file = 'scripts/shiny/spatial-page/page_functions.RData'
+)
+
+## ----------------------
+## TESTS
+
+make_basemap() %>%
+  update_basemap(get_map_data(2011, 2))
+
+make_profile(2012, 3)
+
