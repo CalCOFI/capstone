@@ -38,7 +38,7 @@ spatial_tab <- tabItem(tabName = 'spatial',
                                title = 'Select time',
                                status = 'info',
                                solidHeader = T,
-                               collapsible = T,
+                               # collapsible = T,
                                width = 3),
                            # map
                            box(map_comments,
@@ -46,15 +46,22 @@ spatial_tab <- tabItem(tabName = 'spatial',
                                title = 'Sampling locations',
                                status = 'primary',
                                solidHeader = T,
-                               collapsible = T,
+                               # collapsible = T,
                                width = 4),
                            # depth profile
-                           box(plotOutput('profile'),
+                           tabBox(
+                               tabPanel("Profile",
+                               plotOutput('profile'),
                                title = 'Depth profiles',
                                status = 'primary',
                                solidHeader = T,
-                               collapsible = T,
-                               width = 5)
+                               # collapsible = T,
+                               width = 5),
+                               tabPanel("Intro",
+                                        solidHeader = T,
+                                        # collapsible = T,
+                                        width = 5)
+                               )
                        )
 )
 
@@ -82,8 +89,8 @@ body <- dashboardBody(
 )
 
 # define user interface
-ui <- dashboardPage(
-    dashboardHeader(title = 'Draft'),
+ui <- fluidPage(
+    titlePanel("Draft"),
     sidebar,
     body
 )
