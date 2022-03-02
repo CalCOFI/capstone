@@ -6,8 +6,12 @@ This is a temporary script file.
 """
 import pandas as pd
 import numpy as np
+import chardet
 
-data = pd.read_csv('C:/Users/prera/Documents/GitHub/CalCOFI22/dataset_to_use/CalCOFI_Database_194903-202001_csv_22Sep2021/194903-202001_Bottle.csv')
+with open('C:/Users/prera/Documents/GitHub/CalCOFI22/data/raw/194903-202001_Bottle.zip', 'rb') as f:
+    enc = chardet.detect(f.read())  # or readline if the file is large
+
+data = pd.read_csv('C:/Users/prera/Documents/GitHub/CalCOFI22/data/raw/194903-202001_Bottle.zip', encoding = 'latin1')
 df = pd.DataFrame(data)
 #[889500 rows x 62 columns]
 
@@ -26,7 +30,7 @@ table = df[['Btl_Cnt', 'Cst_Cnt','Depth_ID','Depthm','T_degC','O2ml_L','R_Depth'
 #str(table['Depth_ID'][889499][:2])+str(table['Depth_ID'][889499][3:7])
 
 #Doing it the first way
-cast_data = pd.DataFrame(pd.read_csv('C:/Users/prera/Documents/GitHub/CalCOFI22/cast_table.csv'))
+cast_data = pd.DataFrame(pd.read_csv('C:/Users/prera/Documents/GitHub/CalCOFI22/data/cast_table.csv'))
 combined = pd.merge(table, cast_data, how="left", on="Cst_Cnt")
 indices = np.where(combined['Year']==2000)
 cut_by_date = combined.loc[min(indices[0]):]
@@ -34,4 +38,4 @@ cut_by_date = combined.loc[min(indices[0]):]
 
 #finally cut down by depth. We only want surface measurements for now
 #final = cut_by_date.loc[cut_by_date['Depthm']==0]
-#final.to_csv()
+cut_by_date.to_csv('bottle_and_cast.csv')
