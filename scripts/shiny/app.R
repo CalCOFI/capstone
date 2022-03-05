@@ -26,6 +26,7 @@ spatial_sidebar <- sidebarPanel(
                  max = 4,
                  step = 1,
                  value = 1),
+    selectInput('lin', 'Line ID', lines),
     width = 12)
 
 map_comments <- 'Note: point size shows location variability across all sampling events, but not to scale.'
@@ -121,6 +122,13 @@ server <- function(input, output, session) {
     
     # plot depth profiles
     output$profile <- renderPlot({profile_plot()})
+    
+    ## LINE PROFILES
+    # line_plot <- reactive({
+    #     PLOT_FN(..., input$lin)
+    # })
+    
+    # output$NEWUIOUT <- renderPlot({line_plot()})
     
 } 
 
