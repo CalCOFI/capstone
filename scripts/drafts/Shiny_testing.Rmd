@@ -19,7 +19,6 @@ To learn more, see [Interactive Documents](http://rmarkdown.rstudio.com/authorin
 You can embed Shiny inputs and outputs in your document. Outputs are automatically updated whenever inputs change.  This demonstrates how a standard R plot can be made interactive by wrapping it in the Shiny `renderPlot` function. The `selectInput` and `sliderInput` functions create the input widgets used to drive the plot.
 
 ```{r eruptions, echo=FALSE}
-
 library(shiny)
 library(leaflet)
 #read in data 
@@ -33,18 +32,25 @@ library(ggpubr)
 library(leaflet)
 #splitting and averaging by unique values
 library(data.table)
+```
 
+
+```{r eruptions, echo=FALSE}
 cast_bottle <- read_csv("data/processed/bottle_and_cast.csv", show_col_types = FALSE)
 
 #take the averages of the lat/long for each station 
 station_avg <- setDT(cast_bottle)[, .(mean_lat = mean(Lat_Dec), mean_long = mean(Lon_Dec)), by = Sta_ID]
+```
 
+
+```{r eruptions, echo=FALSE}
 #create a base map using leaflet 
 basemap <- leaflet() %>% 
 #set the latitude and longitude for California, zoom into desired area 
 setView(lng = -119.4179, lat = 36.7783, zoom = 5.3) %>%
 #add markers for each of the stations average lat and long 
   addTiles() %>%
+  addProviderTiles(providers$Esri.WorldImagery)%>%
   addCircleMarkers(
     lat = station_avg$mean_lat, 
     lng = station_avg$mean_long,
@@ -52,7 +58,10 @@ setView(lng = -119.4179, lat = 36.7783, zoom = 5.3) %>%
     color = "red", 
     radius = 0.6
     )
+```
 
+
+```{r eruptions, echo=FALSE}
 ui<- fluidPage(
   leafletOutput("mymap"),
   h1("Map of Stations off of California Coast"),

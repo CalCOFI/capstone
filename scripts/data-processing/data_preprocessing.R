@@ -65,7 +65,7 @@ bottle_raw <- read_csv(file = 'data/raw/194903-202001_Bottle.zip',
 # merge cast data
 bottle <- read_csv(file = 'data/raw/194903-202001_Cast.csv',
                    col_select = c(Cst_Cnt, Sta_ID, Cast_ID, 
-                                  Date, Quarter, Lat_Dec, Lon_Dec)) %>%
+                                  Date, Quarter, Lat_Dec, Lon_Dec, Distance)) %>%
   # join spatial info from cast data
   right_join(bottle_raw, cast_raw, by = c('Cst_Cnt', 'Sta_ID')) %>%
   # parse date column to datetime

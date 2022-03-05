@@ -9,10 +9,10 @@ Original file is located at
 
 import pandas as pd
 import numpy as np
-cast_info = pd.read_csv('/work/194903-202001_Cast.csv')
+cast_info = pd.read_csv('C:/Users/prera/Documents/GitHub/CalCOFI22/data/raw/194903-202001_Cast.csv')
 
 # select susbet of columns that we want
-cast_info = cast_info[['Cst_Cnt', 'Cast_ID', 'Quarter', 'Date', 'Year', 'Month', 'Lat_Dec', 'Lon_Dec', 'Sta_ID', 'St_Line']]
+cast_info = cast_info[['Cst_Cnt', 'Cast_ID', 'Quarter', 'Date', 'Year', 'Month', 'Lat_Dec', 'Lon_Dec', 'Sta_ID', 'St_Line', 'Distance']]
 # only show observations from 2000 and later
 cast_info = cast_info[cast_info.Year >= 2000]
 cast_info
