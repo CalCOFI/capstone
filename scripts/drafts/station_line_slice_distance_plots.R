@@ -56,12 +56,14 @@ bottle %>%
            distance) %>%
   summarize(oxygen = median(oxygen, na.rm = T)) %>% # tinker with summary stat
   ggplot(aes(x = distance, y = fct_rev(depth_interval))) +
-  facet_wrap(~ quarter, nrow = 4,
+  facet_wrap(~ quarter, 
+             # scales = "free_x",
+             nrow = 4,
              # labeller = labeller(list(1 = "Winter",
              #                 2= "Spring",
              #                 3 = "Summar",
              #                 4 = "Fall")),
-             scales = "free_x") +
+             ) +
   # using geom_tile instead of raster in order to create boxes of different widths
   geom_tile(aes(fill = oxygen, width = distance)) +
   # adjust color scale
