@@ -33,16 +33,13 @@ map_comments <- 'Note: point size shows location variability across all sampling
 # define layout for body of spatial tab
 spatial_tab <- tabItem(tabName = 'spatial',
                        fluidRow(
-                           column(3,
                            # user selections
                            box(spatial_sidebar,
                                title = 'Select time',
                                status = 'info',
                                solidHeader = T,
                                # collapsible = T,
-                               width = 3)
-                           ),
-                           column(6,
+                               width = 2),
                            # map
                            box(map_comments,
                                leafletOutput('map'),
@@ -50,9 +47,7 @@ spatial_tab <- tabItem(tabName = 'spatial',
                                status = 'primary',
                                solidHeader = T,
                                # collapsible = T,
-                               width = 4)
-                           ),
-                           column(3,
+                               width = 6),
                            # depth profile
                            tabBox(
                                tabPanel("Profile",
@@ -61,13 +56,12 @@ spatial_tab <- tabItem(tabName = 'spatial',
                                status = 'primary',
                                solidHeader = T,
                                # collapsible = T,
-                               width = 5),
+                               width = 4),
                                tabPanel("Intro",
                                         solidHeader = T,
                                         # collapsible = T,
-                                        width = 5)
-                               )
-                           )
+                                        width = 4),
+                               width = 4)
                        )
 )
 
@@ -81,13 +75,13 @@ blank_tab <- tabItem(tabName = 'somethingelse',
 ## USER INTERFACE LAYOUT
 
 # menu to navigate tabs (note tabName must match tabItems)
-sidebar <- dashboardSidebar(sidebarMenu(
+sidebar <- sidebarPanel(sidebarMenu(
     menuItem('Spatial variation', tabName = 'spatial'),
-    menuItem('Another tab', tabName = 'somethingelse'))
-)
+    menuItem('Another tab', tabName = 'somethingelse')),
+    width = 1)
 
 # body for each tab
-body <- dashboardBody(
+body <- mainPanel(
     tabItems(
         spatial_tab,
         blank_tab
@@ -98,7 +92,7 @@ body <- dashboardBody(
 ui <- fluidPage(
     titlePanel("Draft"),
     sidebar,
-    body
+    body,
 )
 
 
