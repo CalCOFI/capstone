@@ -33,13 +33,16 @@ map_comments <- 'Note: point size shows location variability across all sampling
 # define layout for body of spatial tab
 spatial_tab <- tabItem(tabName = 'spatial',
                        fluidRow(
+                           column(3,
                            # user selections
                            box(spatial_sidebar,
                                title = 'Select time',
                                status = 'info',
                                solidHeader = T,
                                # collapsible = T,
-                               width = 3),
+                               width = 3)
+                           ),
+                           column(6,
                            # map
                            box(map_comments,
                                leafletOutput('map'),
@@ -47,7 +50,9 @@ spatial_tab <- tabItem(tabName = 'spatial',
                                status = 'primary',
                                solidHeader = T,
                                # collapsible = T,
-                               width = 4),
+                               width = 4)
+                           ),
+                           column(3,
                            # depth profile
                            tabBox(
                                tabPanel("Profile",
@@ -62,6 +67,7 @@ spatial_tab <- tabItem(tabName = 'spatial',
                                         # collapsible = T,
                                         width = 5)
                                )
+                           )
                        )
 )
 
