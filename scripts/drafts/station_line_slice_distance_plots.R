@@ -41,16 +41,20 @@ load("data/processed/bottle.RData") # updated to hold year, distance
 
 yr <- 2015
 qr <- 4
-ln <- "076.7"
+lin <- "076.7"
 
 bottle %>%
   # filter to year, quarter, and station of interest
   filter(year == yr, 
          # quarter == qr,
-         line == ln) %>%
+         line == lin) %>%
   # bin depths into roughly even numbers of observations
   mutate(depth_interval = cut_number(depth, 10)) %>%
   # aggregate within depth bins
+  mutate(quarter = replace(quarter, quarter == 1, "Q1 - Winter")) %>% 
+  mutate(quarter = replace(quarter, quarter == 2, "Q2 - Spring")) %>% 
+  mutate(quarter = replace(quarter, quarter == 3, "Q3 - Summer")) %>%
+  mutate(quarter = replace(quarter, quarter == 4, "Q4 - Fall")) %>%
   group_by(depth_interval,
            quarter,
            distance) %>%
@@ -58,12 +62,7 @@ bottle %>%
   ggplot(aes(x = distance, y = fct_rev(depth_interval))) +
   facet_wrap(~ quarter, 
              # scales = "free_x",
-             nrow = 4,
-             # labeller = labeller(list(1 = "Winter",
-             #                 2= "Spring",
-             #                 3 = "Summar",
-             #                 4 = "Fall")),
-             ) +
+             nrow = 4) +
   # using geom_tile instead of raster in order to create boxes of different widths
   geom_tile(aes(fill = oxygen, width = distance)) +
   # adjust color scale
