@@ -157,7 +157,9 @@ station_info <- cast_bottle %>%
   ungroup()
 
 
-
+bottom_depth <- bottle %>% 
+  group_by(station) %>% 
+  summarise(bottomd = max(bottomd, na.rm = TRUE))
 
 station_info %>%
   mutate(label_line1 = paste('Line ID', line, sep = ' '),
@@ -180,7 +182,11 @@ station_info %>%
     lng = ~lon, 
     popup = ~label, 
     color = "red", 
-    radius = 0.6) 
+    radius = (log(bottom_depth$bottomd))/10) %>% 
+  addPolylines(lat = ~lat, 
+               lng = ~lng, 
+               color = "blue", 
+               radi)
   
 #chooses unique station lines (filters dataset by unique station lines) --> draws line for each station
 #for (i in 1:nrow(bottle)) 
