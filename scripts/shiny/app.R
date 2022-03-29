@@ -48,17 +48,18 @@ ui <- navbarPage("CalCOFI", id="nav",
                         tags$div(id="cite",
                                  'Data compiled for ', tags$em('Coming Apart: The State of White America, 1960–2010'), ' by Charles Murray (Crown Forum, 2012).'
                         )
-                    )
+                    ),
            ),
            
            tabPanel("Something else",
                     fluidRow(h2("Something else"))
            ),
-           #conditionalPanel("false", icon("crosshair")),
-           sidebarPanel(id="sidebar",
-             h2("Plots"),
-             plotOutput('profile'),
-             )
+           conditionalPanel("false", icon("crosshair")),
+           sidebarPanel(h2("Plots"),
+               border = "bottom",
+               width = 4,
+               plotOutput('profile'),
+               )
 )
 # # user input panel for spatial tab
 # spatial_sidebar <- sidebarPanel(
