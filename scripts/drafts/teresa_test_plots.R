@@ -169,7 +169,7 @@ station_info %>%
   unite(label,
         contains('label'),
         sep = ' <br/> ') %>%
-  select(-contains('label_line')) %>%
+  dplyr::select(-contains('label_line')) %>%
   leaflet() %>% 
 #set the latitude and longitude for California, zoom into desired area 
   setView(lng = mean(station_info$lon), 
@@ -184,15 +184,14 @@ station_info %>%
     color = "red", 
     radius = (log(bottom_depth$bottomd))/10) %>% 
   addPolylines(lat = ~lat, 
-               lng = ~lng, 
-               color = "blue", 
-               radi)
+               lng = ~lon, 
+               color = "blue")
   
 #chooses unique station lines (filters dataset by unique station lines) --> draws line for each station
-#for (i in 1:nrow(bottle)) 
- # station_info<-station_info %>% 
-  #addPolylines(lat=c(),
-              # lng=c())
+for (i ) 
+ station_info<-station_info %>% 
+  addPolylines(lat=c(),
+              lng=c())
 
 
 
