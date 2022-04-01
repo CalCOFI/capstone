@@ -41,7 +41,7 @@ ui <- navbarPage("CalCOFI", id="nav",
                                                    step = 1,
                                                    value = 1),
 
-                                      #plotOutput('profile'),
+                                      plotOutput('profile'),
                         ),
                         
                         
@@ -55,11 +55,6 @@ ui <- navbarPage("CalCOFI", id="nav",
                     fluidRow(h2("Something else"))
            ),
            conditionalPanel("false", icon("crosshair")),
-           sidebarPanel(h2("Plots"),
-               border = "bottom",
-               width = 4,
-               plotOutput('profile'),
-               )
 )
 # # user input panel for spatial tab
 # spatial_sidebar <- sidebarPanel(
