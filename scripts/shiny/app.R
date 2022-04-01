@@ -40,7 +40,6 @@ ui <- navbarPage("CalCOFI", id="nav",
                                                    max = 4,
                                                    step = 1,
                                                    value = 1),
-
                                       plotOutput('profile'),
                         ),
                         
@@ -163,6 +162,13 @@ server <- function(input, output, session) {
     
     # plot depth profiles
     output$profile <- renderPlot({profile_plot()})
+    
+    ## LINE PROFILES
+    # line_plot <- reactive({
+    #     PLOT_FN(..., input$lin)
+    # })
+    
+    # output$NEWUIOUT <- renderPlot({line_plot()})
     
 } 
 
