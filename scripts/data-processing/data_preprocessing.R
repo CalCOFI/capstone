@@ -65,8 +65,7 @@ bottle_raw <- read_csv(file = 'data/raw/194903-202001_Bottle.zip',
 # merge cast data
 bottle <- read_csv(file = 'data/raw/194903-202001_Cast.csv',
                    col_select = c(Cst_Cnt, Sta_ID, Cast_ID, 
-                                  Date, Quarter, Lat_Dec, Lon_Dec, 
-                                  Year, Distance, Bottom_D)) %>%
+                                  Date, Quarter, Lat_Dec, Lon_Dec)) %>%
   # join spatial info from cast data
   right_join(bottle_raw, cast_raw, by = c('Cst_Cnt', 'Sta_ID')) %>%
   # parse date column to datetime
@@ -80,10 +79,7 @@ bottle <- read_csv(file = 'data/raw/194903-202001_Cast.csv',
          temperature = T_degC,
          salinity = Salnty,
          id = Sta_ID,
-         cast = Cst_Cnt,
-         year = Year,
-         distance = Distance,
-         bottomd = Bottom_D) %>%
+         cast = Cst_Cnt) %>%
   # drop unused variables
   select(-c(Cast_ID, Btl_Cnt, Depth_ID, R_Depth, Date)) %>%
   # split id into station and line
