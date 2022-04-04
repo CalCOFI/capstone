@@ -5,7 +5,7 @@ library(htmltools)
 library(tidyverse)
 library(lubridate)
 load('data/processed/bottle.RData')
-bottle <- bottle %>% filter(year(date) >= 2010)
+# bottle <- bottle %>% filter(year(date) >= 2010)
 
 ## -----------------------------
 ## SPATIAL PAGE
@@ -17,6 +17,7 @@ get_map_data <- function(yr, qr){
   
   # station locations
   station_locations <- bottle %>%
+    filter(year(date) == yr) %>%
     # select location info
     select(lat, 
            lon, 
@@ -77,8 +78,8 @@ make_basemap <- function(){
   addProviderTiles(providers$Esri.OceanBasemap)
 }
 
-# add points to map - would need to change the filtered_data code so that we
-# only show points from one year
+
+
 update_basemap <- function(basemap, filtered_data){
   basemap %>%
   clearMarkers() %>%
@@ -215,7 +216,7 @@ save(
 ## TESTS
 
 make_basemap() %>%
-  update_basemap(get_map_data(2011, 2))
+  update_basemap(get_map_data(1984, 4))
 
 make_profile(2012, 3)
 make_station_line(2014, "093.3")
