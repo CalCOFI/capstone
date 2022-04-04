@@ -187,8 +187,9 @@ station_info %>%
                lng = ~lon, 
                color = "blue")
   
+
 #chooses unique station lines (filters dataset by unique station lines) --> draws line for each station
-for (i ) 
+for () 
  station_info<-station_info %>% 
   addPolylines(lat=c(),
               lng=c())
