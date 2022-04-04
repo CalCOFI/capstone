@@ -66,7 +66,7 @@ get_map_data <- function(yr, qr){
 point_color_fn <- colorFactor(c('#B73407', '#393939'), 
                               c(T, F))
 
-lines <- bottle %>% pull(line) %>% unique()
+# lines <- bottle %>% pull(line) %>% unique()
 
 # generate base map layer
 make_basemap <- function(){
@@ -86,6 +86,7 @@ update_basemap <- function(basemap, filtered_data){
                    lng = ~lon_ctr, 
                    popup = ~label, 
                    color = ~point_color_fn(sampled_ix),
+                  #once bottom_d added change radius = bottom depth/ or hypoxia 
                    radius = ~ -log(loc_se),
                    data = filtered_data)
 }

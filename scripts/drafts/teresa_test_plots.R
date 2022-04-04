@@ -10,6 +10,7 @@ library(tidyverse)
 library(ggpubr)
 library(leaflet)
 library(data.table)
+library(lubridate)
 
 ## DATA ----------------------------------------------------------------
 #cast and bottle preprocessed data; note col types avoids parse failures
@@ -17,7 +18,7 @@ cast_bottle <- read_csv("data/processed/bottle_and_cast.csv",
                         col_types = cols(pH1 = col_double(),
                                          pH2 = col_double()))
 
-load('data/processed/bottle-cast-recent.RData')
+load('data/processed/bottle.RData')
 
 ## ----------------------------------------------------------------
 
@@ -155,6 +156,11 @@ station_info <- cast_bottle %>%
             n = n_distinct(date)) %>%
   ungroup()
 
+
+bottom_depth <- bottle %>% 
+  group_by(station) %>% 
+  summarise(bottomd = max(bottomd, na.rm = TRUE))
+
 station_info %>%
   mutate(label_line1 = paste('Line ID', line, sep = ' '),
          label_line2 = paste('Station ID', station, sep = ' '),
@@ -163,7 +169,7 @@ station_info %>%
   unite(label,
         contains('label'),
         sep = ' <br/> ') %>%
-  select(-contains('label_line')) %>%
+  dplyr::select(-contains('label_line')) %>%
   leaflet() %>% 
 #set the latitude and longitude for California, zoom into desired area 
   setView(lng = mean(station_info$lon), 
@@ -176,8 +182,19 @@ station_info %>%
     lng = ~lon, 
     popup = ~label, 
     color = "red", 
-    radius = 0.6)
+    radius = (log(bottom_depth$bottomd))/10) %>% 
+  addPolylines(lat = ~lat, 
+               lng = ~lon, 
+               color = "blue")
   
+
+#chooses unique station lines (filters dataset by unique station lines) --> draws line for each station
+for () 
+ station_info<-station_info %>% 
+  addPolylines(lat=c(),
+              lng=c())
+
+
 
 
 
