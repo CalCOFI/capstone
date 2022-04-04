@@ -5,7 +5,7 @@ library(htmltools)
 library(tidyverse)
 library(lubridate)
 load('data/processed/bottle.RData')
-bottle <- bottle %>% filter(year(date) >= 2010)
+# bottle <- bottle %>% filter(year(date) >= 2010)
 
 ## -----------------------------
 ## SPATIAL PAGE
@@ -216,7 +216,7 @@ save(
 ## TESTS
 
 make_basemap() %>%
-  update_basemap(get_map_data(1980, 4))
+  update_basemap(get_map_data(1984, 4))
 
 make_profile(2012, 3)
 make_station_line(2014, "093.3")
