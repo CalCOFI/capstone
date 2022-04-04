@@ -77,7 +77,8 @@ make_basemap <- function(){
   addProviderTiles(providers$Esri.OceanBasemap)
 }
 
-# add points to map
+# add points to map - would need to change the filtered_data code so that we
+# only show points from one year
 update_basemap <- function(basemap, filtered_data){
   basemap %>%
   clearMarkers() %>%
@@ -95,34 +96,73 @@ rev_sqrt <- trans_new('revsqrt',
                       function(x) x^2,
                       breaks = breaks_log(n = 5, base = 10))
 
-# depth profiles
-make_profile <- function(yr, qr){
+# depth profiles - Og function
+# make_profile <- function(yr, qr){
+#   bottle %>% 
+#     filter(year(date) == yr,
+#            quarter == qr) %>%
+#     select(oxygen, 
+#            salinity, 
+#            temperature, 
+#            depth, 
+#            cast) %>%
+#     pivot_longer(1:3, 
+#                  names_to = "measurement", 
+#                  values_to = "value") %>%
+#     ggplot(aes(x = value, y = depth,
+#                group = interaction(cast, measurement))) +
+#     geom_path(alpha = 0.1) +
+#     scale_y_continuous(trans = rev_sqrt) +
+#     facet_wrap(~ measurement,
+#                nrow = 1,
+#                scales = 'free_x') +
+#     geom_hline(yintercept = 0) +
+#     labs(x = '') +
+#     theme_minimal() +
+#     theme(axis.text.x = element_text(angle = 90, 
+#                                      size = 8, 
+#                                      vjust = 0.5),
+#           axis.text.y = element_text(size = 8))
+# }
+
+make_profile <- function(yr, lin){
+  stations_in_line <- bottle %>%
+    filter(year(date) == yr,
+           depth <= 1000,
+           line == lin) %>%
+    mutate(quarter = replace(quarter, quarter == 1, "Q1 - Winter"), 
+           quarter = replace(quarter, quarter == 2, "Q2 - Spring"), 
+           quarter = replace(quarter, quarter == 3, "Q3 - Summer"), 
+           quarter = replace(quarter, quarter == 4, "Q4 - Fall")) %>%
+    subset(line == lin)
   bottle %>% 
     filter(year(date) == yr,
-           quarter == qr) %>%
-    select(oxygen, 
-           salinity, 
-           temperature, 
-           depth, 
-           cast) %>%
-    pivot_longer(1:3, 
-                 names_to = "measurement", 
-                 values_to = "value") %>%
-    ggplot(aes(x = value, y = depth,
-               group = interaction(cast, measurement))) +
-    geom_path(alpha = 0.1) +
+           depth <= 1000,
+           line != lin) %>%
+    mutate(quarter = replace(quarter, quarter == 1, "Q1 - Winter"), 
+           quarter = replace(quarter, quarter == 2, "Q2 - Spring"), 
+           quarter = replace(quarter, quarter == 3, "Q3 - Summer"), 
+           quarter = replace(quarter, quarter == 4, "Q4 - Fall")) %>%
+    ggplot(aes(x = oxygen, y = depth,
+               group = interaction(cast, quarter))) +
+    geom_path(color = "black", alpha = 0.1) +
+    geom_path(data = stations_in_line,
+              color = "red",
+              size = 2,
+              alpha = 0.1) +
     scale_y_continuous(trans = rev_sqrt) +
-    facet_wrap(~ measurement,
-               nrow = 1,
-               scales = 'free_x') +
+    facet_wrap(~ quarter,
+               nrow = 1) +
     geom_hline(yintercept = 0) +
-    labs(x = '') +
+    labs(x = 'Oxygen (ml of O_2/L of seawater)') +
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 90, 
                                      size = 8, 
                                      vjust = 0.5),
           axis.text.y = element_text(size = 8))
 }
+
+
 
 make_station_line <- function(yr, lin){
   bottle %>%
@@ -133,10 +173,10 @@ make_station_line <- function(yr, lin){
     # bin depths into roughly even numbers of observations
     mutate(depth_interval = cut_number(depth, 10)) %>%
     # aggregate within depth bins
-    mutate(quarter = replace(quarter, quarter == 1, "Q1 - Winter")) %>% 
-    mutate(quarter = replace(quarter, quarter == 2, "Q2 - Spring")) %>% 
-    mutate(quarter = replace(quarter, quarter == 3, "Q3 - Summer")) %>%
-    mutate(quarter = replace(quarter, quarter == 4, "Q4 - Fall")) %>%
+    mutate(quarter = replace(quarter, quarter == 1, "Q1 - Winter"), 
+           quarter = replace(quarter, quarter == 2, "Q2 - Spring"), 
+           quarter = replace(quarter, quarter == 3, "Q3 - Summer"), 
+           quarter = replace(quarter, quarter == 4, "Q4 - Fall")) %>%
     group_by(depth_interval,
              quarter,
              distance) %>%
@@ -177,4 +217,5 @@ make_basemap() %>%
   update_basemap(get_map_data(2011, 2))
 
 make_profile(2012, 3)
+make_station_line(2014, "093.3")
 
