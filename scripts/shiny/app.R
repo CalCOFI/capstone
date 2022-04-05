@@ -173,13 +173,13 @@ server <- function(input, output, session) {
     profile_plot <- reactive({
         make_profile(input$yr, input$qr)
     })
-    profile_plot <- reactive({
+    station_line_plot <- reactive({
       make_station_line(input$yr, input$lin)
     })
     
     # plot depth profiles
     output$profile <- renderPlot({profile_plot()})
-    output$stationline <- renderPlot({station_line_plot})
+    output$stationline <- renderPlot({station_line_plot()})
     
 } 
 
