@@ -50,11 +50,24 @@ ui <- navbarPage("CalCOFI", id="nav",
                         column(4,
                                absolutePanel(id = "controls",class = "panel panel-default",
                                              fixed = TRUE,
-                                             draggable = FALSE, top = 60, left = "auto", right = 20, bottom = "auto",
-                                             width = 500, height = "auto", 
+                                             draggable = FALSE, top = 50, left = "auto", right = 0, bottom = "auto",
+                                             width = 600, height = 1000000, 
                                              h2('Plots'),
-                                             plotOutput("profile"),
-                                             plotOutput('stationline')
+                                             div(
+                                             tabsetPanel(
+                                                 tabPanel(
+                                                     title = 'Depth profiles',
+                                                     width = "100%",
+                                                     height = "100%",
+                                                     status = 'primary',
+                                                     solidHeader = T,
+                                             plotOutput("profile")),
+                                             tabPanel(
+                                                 title = "Station Line Profiles",
+                                                 width = "100%",
+                                                 height = "100%",
+                                                 plotOutput('stationline'))),
+                                             ),
                                )
                         ),
                         
@@ -185,5 +198,4 @@ server <- function(input, output, session) {
 
 ## ---------------
 ## DEPLOY
-
 shinyApp(ui,server)
