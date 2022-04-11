@@ -185,7 +185,8 @@ station_info %>%
     radius = (log(bottom_depth$bottomd))/10) %>% 
   addPolylines(lat = ~lat, 
                lng = ~lon, 
-               color = "blue")
+               color = "blue",
+               data = filter(station_info, line == '066.7'))
   
 
 #chooses unique station lines (filters dataset by unique station lines) --> draws line for each station
