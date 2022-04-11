@@ -149,7 +149,7 @@ make_profile <- function(yr, lin){
                group = interaction(cast, quarter))) +
     geom_path(color = "black", alpha = 0.1) +
     geom_path(data = stations_in_line,
-              color = "red",
+              color = "aquamarine3",
               size = 2,
               alpha = 0.1) +
     scale_y_continuous(trans = rev_sqrt) +
@@ -218,5 +218,5 @@ save(
 make_basemap() %>%
   update_basemap(get_map_data(1984, 4))
 
-make_profile(2012, 3)
+make_profile(2012, "093.3")
 make_station_line(2014, "093.3")
