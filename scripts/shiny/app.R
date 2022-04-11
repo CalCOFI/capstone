@@ -43,7 +43,7 @@ ui <- navbarPage("CalCOFI", id="nav",
                                                    value = 1),
                                       selectInput('lin',
                                                   'Line ID',
-                                                  lines,
+                                                  sort(lines),
                                       ),
 
                         ),
