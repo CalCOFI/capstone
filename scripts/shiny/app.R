@@ -184,7 +184,7 @@ server <- function(input, output, session) {
     ## PROFILE PANEL
     # user retrieve data by year/quarter
     profile_plot <- reactive({
-        make_profile(input$yr, input$qr)
+        make_profile(input$yr, input$lin)
     })
     station_line_plot <- reactive({
       make_station_line(input$yr, input$lin)
@@ -198,5 +198,4 @@ server <- function(input, output, session) {
 
 ## ---------------
 ## DEPLOY
-
 shinyApp(ui,server)
