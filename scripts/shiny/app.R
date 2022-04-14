@@ -43,18 +43,31 @@ ui <- navbarPage("CalCOFI", id="nav",
                                                    value = 1),
                                       selectInput('lin',
                                                   'Line ID',
-                                                  lines,
+                                                  sort(lines),
                                       ),
 
                         ),
                         column(4,
                                absolutePanel(id = "controls",class = "panel panel-default",
                                              fixed = TRUE,
-                                             draggable = FALSE, top = 60, left = "auto", right = 20, bottom = "auto",
-                                             width = 500, height = "auto", 
+                                             draggable = FALSE, top = 50, left = "auto", right = 0, bottom = "auto",
+                                             width = 600, height = 1000000, 
                                              h2('Plots'),
-                                             plotOutput("profile"),
-                                             plotOutput('stationline')
+                                             div(
+                                             tabsetPanel(
+                                                 tabPanel(
+                                                     title = 'Depth profiles',
+                                                     width = "100%",
+                                                     height = "100%",
+                                                     status = 'primary',
+                                                     solidHeader = T,
+                                             plotOutput("profile")),
+                                             tabPanel(
+                                                 title = "Station Line Profiles",
+                                                 width = "100%",
+                                                 height = "100%",
+                                                 plotOutput('stationline'))),
+                                             ),
                                )
                         ),
                         
@@ -69,86 +82,6 @@ ui <- navbarPage("CalCOFI", id="nav",
            ),
            conditionalPanel("false", icon("crosshair")),
 )
-# # user input panel for spatial tab
-# spatial_sidebar <- sidebarPanel(
-#     numericInput('yr', # selection gets stored as `input$yr`
-#                  'Year', 
-#                  min = min(year(bottle$date)),
-#                  max = max(year(bottle$date)),
-#                  value = median(year(bottle$date)),
-#                  step = 1),
-#     numericInput('qr', # selection gets stored as `input$qr`
-#                  'Quarter',
-#                  min = 1,
-#                  max = 4,
-#                  step = 1,
-#                  value = 1),
-#     width = 12)
-# 
-# map_comments <- 'Note: point size shows location variability across all sampling events, but not to scale.'
-# 
-# # define layout for body of spatial tab
-# spatial_tab <- tabItem(tabName = 'spatial',
-#                        fluidRow(
-#                            # user selections
-#                            box(spatial_sidebar,
-#                                title = 'Select time',
-#                                status = 'info',
-#                                solidHeader = T,
-#                                # collapsible = T,
-#                                width = 2),
-#                            # map
-#                            box(map_comments,
-#                                leafletOutput('map', 'width=100%', 'height=100%'),
-#                                title = 'Sampling locations',
-#                                status = 'primary',
-#                                solidHeader = T,),
-#                            # depth profile
-#                            tabBox(
-#                                tabPanel("Profile",
-#                                plotOutput('profile'),
-#                                title = 'Depth profiles',
-#                                status = 'primary',
-#                                solidHeader = T,
-#                                # collapsible = T,
-#                                width = 4),
-#                                tabPanel("Intro",
-#                                         solidHeader = T,
-#                                         # collapsible = T,
-#                                         width = 4),
-#                                width = 4)
-#                        )
-# )
-
-## ------------------------
-## SOME OTHER PAGE
-# 
-# blank_tab <- tabItem(tabName = 'somethingelse',
-#                      h2('Something completely different')) 
-# 
-# ## ------------------------
-# ## USER INTERFACE LAYOUT
-# 
-# # menu to navigate tabs (note tabName must match tabItems)
-# sidebar <- sidebarPanel(sidebarMenu(
-#     menuItem('Spatial variation', tabName = 'spatial'),
-#     menuItem('Another tab', tabName = 'somethingelse')),
-#     width = 1)
-# 
-# # body for each tab
-# body <- mainPanel(
-#     tabItems(
-#         spatial_tab,
-#         blank_tab
-#     )
-# )
-# 
-# # define user interface
-# ui <- fluidPage(
-#     titlePanel("Draft"),
-#     sidebar,
-#     body,
-# )
 
 
 ## ------------------
@@ -171,7 +104,7 @@ server <- function(input, output, session) {
     ## PROFILE PANEL
     # user retrieve data by year/quarter
     profile_plot <- reactive({
-        make_profile(input$yr, input$qr)
+        make_profile(input$yr, input$lin)
     })
     station_line_plot <- reactive({
       make_station_line(input$yr, input$lin)
@@ -185,5 +118,4 @@ server <- function(input, output, session) {
 
 ## ---------------
 ## DEPLOY
-
 shinyApp(ui,server)
