@@ -12,6 +12,13 @@ library(leaflet)
 library(data.table)
 library(lubridate)
 
+library(sf)
+library(sp)
+library(rgdal)
+library(raster)
+library(rgeos)
+library(dplyr)
+
 ## DATA ----------------------------------------------------------------
 #cast and bottle preprocessed data; note col types avoids parse failures
 cast_bottle <- read_csv("data/processed/bottle_and_cast.csv",
@@ -161,6 +168,23 @@ bottom_depth <- bottle %>%
   group_by(station) %>% 
   summarise(bottomd = max(bottomd, na.rm = TRUE))
 
+
+bottle_2000 <- filter(bottle, year == 2000, quarter == 1)
+
+test <- bottle_2000 %>%
+  select(line, lon, lat) %>%
+  distinct(lon, lat, line) %>%
+  nest(data = c(lon, lat)) 
+
+geo <- test %>% 
+  pull(data) %>%
+  lapply(function(df){st_linestring(as.matrix(df))}) %>%
+  st_sfc()
+
+df <- test %>% dplyr::select(line)
+
+lines_df <- st_sf(df, geo)
+
 station_info %>%
   mutate(label_line1 = paste('Line ID', line, sep = ' '),
          label_line2 = paste('Station ID', station, sep = ' '),
@@ -183,17 +207,10 @@ station_info %>%
     popup = ~label, 
     color = "red", 
     radius = (log(bottom_depth$bottomd))/10) %>% 
-  addPolylines(lat = ~lat, 
-               lng = ~lon, 
-               color = "blue",
-               data = filter(station_info, line == '066.7'))
+  addPolylines(data = lines_df)
   
 
-#chooses unique station lines (filters dataset by unique station lines) --> draws line for each station
-for () 
- station_info<-station_info %>% 
-  addPolylines(lat=c(),
-              lng=c())
+
 
 
 
