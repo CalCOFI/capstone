@@ -200,14 +200,16 @@ station_info %>%
           lat = mean(station_info$lat), 
           zoom = 5) %>%
 #add markers for each of the stations average lat and long 
-  addProviderTiles(providers$Esri.OceanBasemap) %>%
+  addProviderTiles(providers$Esri.OceanBasemap) %>% 
+  addPolylines(
+    color = "black",
+    data = lines_df) %>%
   addCircleMarkers(
     lat = ~lat, 
     lng = ~lon, 
     popup = ~label, 
     color = "red", 
-    radius = (log(bottom_depth$bottomd))/10) %>% 
-  addPolylines(data = lines_df)
+    radius = (log(bottom_depth$bottomd))/10) 
   
 
 
