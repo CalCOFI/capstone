@@ -6,18 +6,8 @@ library(ggplot2)
 load("data/processed/bottle.RData")
 
 
-ln <- bottle$line
-stn <- bottle$station
-yr <- bottle$year
-dpt <- bottle$depth
-tmp <- bottle$temperature
-oxy <- bottle$oxygen
-sal <- bottle$salinity
-
-
 bot0<- subset(bottle, depth>=0 & depth <= 15)
 dates<-as.data.frame(bot0$date)
-
 
 tp <- ggplot(dates, aes(x=bot0$date)) +
   geom_line(aes(y=bot0$temperature), color = "darkred", na.rm = TRUE) + 
