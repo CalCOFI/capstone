@@ -51,7 +51,6 @@ ui <- navbarPage("CalCOFI", id="nav",
                                              draggable = FALSE, top = 50, left = "auto", right = 0, bottom = "auto",
                                              width = 600, height = 1000000, 
                                              h2('Plots'),
-                                             div(
                                              tabsetPanel(
                                                  tabPanel(
                                                      title = 'Depth profiles',
@@ -64,8 +63,9 @@ ui <- navbarPage("CalCOFI", id="nav",
                                                  title = "Station Line Profiles",
                                                  width = "100%",
                                                  height = "100%",
-                                                 plotOutput('stationline'))),
+                                                 plotOutput('stationline')),
                                              ),
+                                             
                                )
                         ),
                         
@@ -76,7 +76,60 @@ ui <- navbarPage("CalCOFI", id="nav",
            ),
            
            tabPanel("Map Animation",
-                    leafletOutput("map", width="100%", height="100%"),
+                    div(class="outer",
+                        tags$head(
+                          # Include our custom CSS
+                          includeCSS("style.css"),
+                          includeScript("gomap.js")
+                        ),
+                    leafletOutput("map2", width="100%", height="100%"),
+                    absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
+                                  draggable = TRUE, top = 60, left = "auto", right = 700, bottom = "auto",
+                                  width = 330, height = "auto",
+                                  
+                                  h2("Inputs"),
+                                  numericInput('yr', # selection gets stored as `input$yr`
+                                               'Year', 
+                                               min = min(year(bottle$date)),
+                                               max = max(year(bottle$date)),
+                                               value = median(year(bottle$date)),
+                                               step = 1),
+                                  numericInput('qr', # selection gets stored as `input$qr`
+                                               'Quarter',
+                                               min = 1,
+                                               max = 4,
+                                               step = 1,
+                                               value = 1),
+                                  selectInput('lin',
+                                              'Line ID',
+                                              lines,
+                                  ),
+                                  
+                    ),
+                    column(4,
+                           absolutePanel(id = "controls",class = "panel panel-default",
+                                         fixed = TRUE,
+                                         draggable = FALSE, top = 50, left = "auto", right = 0, bottom = "auto",
+                                         width = 600, height = 1000000, 
+                                         h2('Plots'),
+                                         tabsetPanel(
+                                           tabPanel(
+                                             title = 'Depth profiles',
+                                             width = "100%",
+                                             height = "100%",
+                                             status = 'primary',
+                                             solidHeader = T,
+                                             ),
+                                           tabPanel(
+                                             title = "Station Line Profiles",
+                                             width = "100%",
+                                             height = "100%",
+                                             ),
+                                         ),
+                                         
+                           )
+                    ),
+                    ),
            ),
 )
 
@@ -117,6 +170,7 @@ server <- function(input, output, session) {
     # plot depth profiles
     output$profile <- renderPlot({profile_plot()})
     output$stationline <- renderPlot({station_line_plot()})
+    
     
 } 
 
