@@ -62,8 +62,9 @@ ui <- navbarPage("CalCOFI", id="nav",
                                              tabPanel(
                                                  title = "Station Line Profiles",
                                                  width = "100%",
-                                                 height = "100%",
+                                                 height = "200%",
                                                  plotOutput('stationline')),
+                                                 textOutput("quarter"),
                                              ),
                                              
                                )
@@ -75,7 +76,7 @@ ui <- navbarPage("CalCOFI", id="nav",
                     ),
            ),
            
-           tabPanel("Map Animation",
+           tabPanel("Temporal Tab",
                     div(class="outer",
                         tags$head(
                           # Include our custom CSS
@@ -88,18 +89,14 @@ ui <- navbarPage("CalCOFI", id="nav",
                                   width = 330, height = "auto",
                                   
                                   h2("Inputs"),
-                                  numericInput('yr', # selection gets stored as `input$yr`
-                                               'Year', 
-                                               min = min(year(bottle$date)),
-                                               max = max(year(bottle$date)),
-                                               value = median(year(bottle$date)),
-                                               step = 1),
-                                  numericInput('qr', # selection gets stored as `input$qr`
-                                               'Quarter',
-                                               min = 1,
-                                               max = 4,
-                                               step = 1,
-                                               value = 1),
+                                  sliderInput("animation", label = h3("Slider Range"), 
+                                              min = min(year(bottle$date)), 
+                                              max = max(year(bottle$date)), 
+                                              value = c(2011,2013),
+                                              step = 0.25,
+                                              sep = "",
+                                  ),
+                                  verbatimTextOutput("range"),
                                   selectInput('lin',
                                               'Line ID',
                                               lines,
@@ -170,7 +167,8 @@ server <- function(input, output, session) {
     # plot depth profiles
     output$profile <- renderPlot({profile_plot()})
     output$stationline <- renderPlot({station_line_plot()})
-    
+    output$range <- renderPrint({input$animation })
+    output$quarter <- renderText({input$qr})
     
 } 
 
