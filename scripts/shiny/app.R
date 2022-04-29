@@ -6,7 +6,6 @@ library(htmltools)
 library(tidyverse)
 library(scales)
 library(lubridate)
-library(shinythemes)
 load('spatial-page/page_functions.RData') # for deployment
 # load('scripts/shiny/spatial-page/page_functions.RData') # for development
 
@@ -89,14 +88,22 @@ ui <- navbarPage("CalCOFI", id="nav",
                                   width = 330, height = "auto",
                                   
                                   h2("Inputs"),
-                                  sliderInput("animation", label = h3("Slider Range"), 
-                                              min = min(year(bottle$date)), 
-                                              max = max(year(bottle$date)), 
-                                              value = c(2011,2013),
-                                              step = 0.25,
-                                              sep = "",
-                                              ),
-                                  verbatimTextOutput("range"),
+                                  numericInput('yr', # selection gets stored as `input$yr`
+                                               'Year', 
+                                               min = min(year(bottle$date)),
+                                               max = max(year(bottle$date)),
+                                               value = median(year(bottle$date)),
+                                               step = 1),
+                                  numericInput('qr', # selection gets stored as `input$qr`
+                                               'Quarter',
+                                               min = 1,
+                                               max = 4,
+                                               step = 1,
+                                               value = 1),
+                                  selectInput('lin',
+                                              'Line ID',
+                                              lines,
+                                  ),
                                   
                     ),
                     column(4,
@@ -163,9 +170,6 @@ server <- function(input, output, session) {
     # plot depth profiles
     output$profile <- renderPlot({profile_plot()})
     output$stationline <- renderPlot({station_line_plot()})
-    
-    ## SLIDER
-    output$range <- renderPrint({input$animation })
     
     
 } 
