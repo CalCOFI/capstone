@@ -63,6 +63,7 @@ get_map_data <- function(yr, qr){
   return(out)
 }
 
+
 # leaflet-specific
 point_color_fn <- colorFactor(c('#B73407', '#393939'), 
                               c(T, F))

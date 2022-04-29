@@ -89,7 +89,7 @@ ui <- navbarPage("CalCOFI", id="nav",
                                   width = 330, height = "auto",
                                   
                                   h2("Inputs"),
-                                  sliderInput("animation", label = h3("Slider Range"), 
+                                  sliderInput("animation", label = h3("Time Range"), 
                                               min = min(year(bottle$date)), 
                                               max = max(year(bottle$date)), 
                                               value = c(2011,2013),
@@ -97,10 +97,21 @@ ui <- navbarPage("CalCOFI", id="nav",
                                               sep = "",
                                   ),
                                   verbatimTextOutput("range"),
+                                  numericInput('station', # selection gets stored as `input$yr`
+                                               'Station ID', 
+                                               min = 0,
+                                               max = 500,
+                                               value = 110.0,
+                                               ),
                                   selectInput('lin',
                                               'Line ID',
                                               lines,
                                   ),
+                                  h4("Select Parameters"),
+                                  checkboxInput('oxy', 'Oxygen', value = FALSE, width = NULL),
+                                  checkboxInput('temp', 'Temperature', value = FALSE, width = NULL),
+                                  checkboxInput('ph', 'pH', value = FALSE, width = NULL),
+                                  
                                   
                     ),
                     column(4,
@@ -111,14 +122,14 @@ ui <- navbarPage("CalCOFI", id="nav",
                                          h2('Plots'),
                                          tabsetPanel(
                                            tabPanel(
-                                             title = 'Depth profiles',
+                                             title = 'Time Series Plots',
                                              width = "100%",
                                              height = "100%",
                                              status = 'primary',
                                              solidHeader = T,
                                              ),
                                            tabPanel(
-                                             title = "Station Line Profiles",
+                                             title = "Depth Average Plots",
                                              width = "100%",
                                              height = "100%",
                                              ),
@@ -168,7 +179,7 @@ server <- function(input, output, session) {
     output$profile <- renderPlot({profile_plot()})
     output$stationline <- renderPlot({station_line_plot()})
     output$range <- renderPrint({input$animation })
-    output$quarter <- renderText({input$qr})
+    #output$quarter <- renderText({input$qr})
     
 } 
 
