@@ -127,7 +127,9 @@ rev_sqrt <- trans_new('revsqrt',
 #           axis.text.y = element_text(size = 8))
 # }
 
-make_profile <- function(yr, lin){
+
+# adding quarter as input so that we can highlight the corresponding facet title
+make_profile <- function(yr, lin, qr){
   stations_in_line <- bottle %>%
     filter(year(date) == yr,
            depth <= 1000,
@@ -149,7 +151,7 @@ make_profile <- function(yr, lin){
                group = interaction(cast, quarter))) +
     geom_path(color = "black", alpha = 0.1) +
     geom_path(data = stations_in_line,
-              color = "aquamarine3",
+              color = "aquamarine4",
               size = 2,
               alpha = 0.1) +
     scale_y_continuous(trans = rev_sqrt) +
@@ -191,8 +193,8 @@ make_station_line <- function(yr, lin){
     geom_tile(aes(fill = oxygen, width = distance)) +
     # adjust color scale
     scale_fill_gradient2(low = '#E74C3C',
-                         mid = '#F1C40F',
-                         high = '#3498DB',
+                         mid = '#000000',
+                         high = '#1093eb',
                          midpoint = log10(1.4),
                          trans = 'log10') +
     # aesthetics
