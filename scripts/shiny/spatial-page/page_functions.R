@@ -81,8 +81,19 @@ make_basemap <- function(){
 
 
 update_basemap <- function(basemap, filtered_data){
+  list_data <- filtered_data %>%
+    select(line, lon, lat) %>%
+    distinct(lon, lat, line) %>%
+    nest(data = c(lon, lat)) 
+  lines_df <- list_data %>% 
+    pull(data) %>%
+    lapply(function(df){st_linestring(as.matrix(df))}) %>%
+    st_sfc()
+  select_df <- lines_df %>% dplyr::select(line)
+  sf_df <- st_sf(select_df, geo)
   basemap %>%
   clearMarkers() %>%
+    addPolylines(data = sf_df) %>% 
   addCircleMarkers(lat = ~lat_ctr, 
                    lng = ~lon_ctr, 
                    popup = ~label, 
