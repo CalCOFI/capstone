@@ -9,8 +9,7 @@ fxns_r <- here("scripts/shiny/spatial-page/page_functions.R")
 stopifnot(file.exists(fxns_r))
 source(fxns_r)
 
-## --------------
-## SPATIAL PAGE
+# UI ----
 ui <- navbarPage(
   "CalCOFI", id="nav",
   tabPanel(
@@ -48,7 +47,11 @@ ui <- navbarPage(
           'lin',
           'Line ID',
           lines,),
-      ),
+        selectInput(
+          'sel_sta_id',
+          'Station Line ID',
+          station_ids)),
+      
       column(
         4,
         absolutePanel(
@@ -110,7 +113,7 @@ ui <- navbarPage(
           value = 110.0,
         ),
         selectInput(
-          'lin',
+          'lin2',
           'Line ID',
           lines,
         ),
@@ -146,12 +149,10 @@ ui <- navbarPage(
   ),
 )
 
-
-## ------------------
-## OUTPUTS
+# SERVER ----
 server <- function(input, output, session) {
   
-  ## MAP PANEL
+  # map ----
   # user retrieve data by year
   map_data <- reactive({get_map_data(input$yr, input$qr)})
   
@@ -159,6 +160,7 @@ server <- function(input, output, session) {
   output$map1 <- renderLeaflet({make_basemap()})
   output$map2 <- renderLeaflet({make_basemap()})
   
+  # * update_basemap() ----
   # plot user's selection
   observe({
     input$nav
@@ -167,8 +169,16 @@ server <- function(input, output, session) {
       update_basemap(map_data())
     tab2 <- leafletProxy('map2') %>%
       update_basemap(map_data())
-  }
-  )
+  })
+  
+  # * map1_marker_click ----
+  # When marker is clicked, update Station ID selector
+  observe({
+    event <- input$map1_marker_click
+    if (is.null(event))
+      return()
+    updateSelectInput(session, "sel_sta_id", selected=event$id)
+  })
   
   
   ## PROFILE PANEL

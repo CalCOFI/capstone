@@ -4,7 +4,7 @@ if (!require("librarian")){
   library(librarian)
 }
 librarian::shelf(
-  here, htmltools, leaflet, lubridate, sp, tidyverse)
+  glue, here, htmltools, leaflet, lubridate, sp, tidyverse)
 
 # paths ----
 bottle_rda <- here("data/processed/bottle.RData")
@@ -44,7 +44,9 @@ get_map_data <- function(yr, qr){
                      .fns = list(ctr = mean, 
                                  var = var)),
               .groups = 'drop') %>%
-    mutate(loc_se = sqrt(lat_var + lon_var))
+    mutate(
+      sta_id = glue("{line} {station}"),
+      loc_se = sqrt(lat_var + lon_var))
   
   out <- bottle %>%
     # filter to specified year
@@ -80,6 +82,11 @@ get_map_data <- function(yr, qr){
 point_color_fn <- colorFactor(c('#B73407', '#393939'), 
                               c(T, F))
 
+station_ids <- bottle %>% 
+  mutate(
+    sta_id = glue("{line} {station}")) %>% 
+  pull(sta_id) %>% 
+  unique()
 lines <- bottle %>% pull(line) %>% unique()
 
 # generate base map layer
@@ -96,13 +103,15 @@ make_basemap <- function(){
 update_basemap <- function(basemap, filtered_data){
   basemap %>%
   clearMarkers() %>%
-  addCircleMarkers(lat = ~lat_ctr, 
-                   lng = ~lon_ctr, 
-                   popup = ~label, 
-                   color = ~point_color_fn(sampled_ix),
-                  #once bottom_d added change radius = bottom depth/ or hypoxia 
-                   radius = ~ -log(loc_se),
-                   data = filtered_data)
+  addCircleMarkers(
+    lat = ~lat_ctr, 
+    lng = ~lon_ctr, 
+    popup = ~label, 
+    color = ~point_color_fn(sampled_ix),
+    #once bottom_d added change radius = bottom depth/ or hypoxia 
+    radius = ~ -log(loc_se),
+    data = filtered_data,
+    layerId = ~sta_id)
 }
 
 # custom transformation for depth profiles
