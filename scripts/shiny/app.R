@@ -89,7 +89,7 @@ ui <- navbarPage("CalCOFI", id="nav",
                                   width = 330, height = "auto",
                                   
                                   h2("Inputs"),
-                                  sliderInput("animation", label = h3("Time Range"), 
+                                  sliderInput("animation", label = "Time Range", 
                                               min = min(year(bottle$date)), 
                                               max = max(year(bottle$date)), 
                                               value = c(2011,2013),
