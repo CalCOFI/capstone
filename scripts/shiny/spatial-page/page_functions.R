@@ -1,10 +1,22 @@
-library(leaflet)
-library(sp)
-library(scales)
-library(htmltools)
-library(tidyverse)
-library(lubridate)
-load('data/processed/bottle.RData')
+# packages ----
+if (!require("librarian")){
+  install.packages("librarian")
+  library(librarian)
+}
+librarian::shelf(
+  here, htmltools, leaflet, lubridate, sp, tidyverse)
+
+# paths ----
+bottle_rda <- here("data/processed/bottle.RData")
+save_rda   <- here("scripts/shiny/spatial-pagepage_functions.RData")
+
+# check paths
+stopifnot(file.exists(bottle_rda))
+stopifnot(dir.exists(dirname(save_rda)))
+
+# load data
+load(bottle_rda)
+
 # bottle <- bottle %>% filter(year(date) >= 2010)
 
 ## -----------------------------
@@ -68,7 +80,7 @@ get_map_data <- function(yr, qr){
 point_color_fn <- colorFactor(c('#B73407', '#393939'), 
                               c(T, F))
 
-# lines <- bottle %>% pull(line) %>% unique()
+lines <- bottle %>% pull(line) %>% unique()
 
 # generate base map layer
 make_basemap <- function(){
@@ -210,8 +222,7 @@ make_station_line <- function(yr, lin){
 
 save(
   list = ls(),
-  file = 'scripts/shiny/spatial-page/page_functions.RData'
-)
+  file = save_rda)
 
 ## ----------------------
 ## TESTS
