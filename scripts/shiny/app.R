@@ -10,6 +10,7 @@ stopifnot(file.exists(fxns_r))
 source(fxns_r)
 
 # UI ----
+#* Spatial tab ----
 ui <- navbarPage(
   "CalCOFI", id="nav",
   tabPanel(
@@ -67,12 +68,12 @@ ui <- navbarPage(
               height = "100%",
               status = 'primary',
               solidHeader = T,
-              plotOutput("profile")),
+              plotOutput("profile", width = "100%", height = "800px",)),
             tabPanel(
               title = "Station Line Profiles",
               width = "100%",
               height = "200%",
-              plotOutput('stationline')),
+              plotOutput('stationline', width = "100%", height = "800px",)),
             textOutput("quarter"),
           ),
         )),
@@ -80,7 +81,7 @@ ui <- navbarPage(
         id="cite",
         'Data compiled for ', tags$em('CalCOFI'), ' by Us')),
     ),
-  
+#* temporal tab ----  
   tabPanel(
     "Temporal Tab",
     div(
@@ -96,27 +97,26 @@ ui <- navbarPage(
         width = 330, height = "auto",
         
         h2("Inputs"),
-        sliderInput(
-          "animation", label = "Time Range", 
-          min = min(year(bottle$date), na.rm = T), 
-          max = max(year(bottle$date), na.rm = T), 
-          value = c(2011,2013),
-          step = 0.25,
-          sep = "",
+        dateRangeInput(
+          "animation",
+          "Date Range",
+          start = "2000-01",
+          end = "2010-01",
+          min = "1970-01",
+          max = "2020-12",
+          format = "yyyy-mm",
+          startview = "month",
+          weekstart = 0,
+          language = "en",
+          separator = " to ",
+          width = NULL,
+          autoclose = TRUE
         ),
         verbatimTextOutput("range"),
-        numericInput(
-          'station', # selection gets stored as `input$yr`
-          'Station ID', 
-          min = 0,
-          max = 500,
-          value = 110.0,
-        ),
         selectInput(
-          'lin2',
-          'Line ID',
-          lines,
-        ),
+          'sel_sta_id2',
+          'Station Line ID',
+          station_ids),
         h4("Select Parameters"),
         checkboxInput('oxy', 'Oxygen', value = FALSE, width = NULL),
         checkboxInput('temp', 'Temperature', value = FALSE, width = NULL),
@@ -178,6 +178,12 @@ server <- function(input, output, session) {
     if (is.null(event))
       return()
     updateSelectInput(session, "sel_sta_id", selected=event$id)
+  })
+  observe({
+    event <- input$map2_marker_click
+    if (is.null(event))
+      return()
+    updateSelectInput(session, "sel_sta_id2", selected=event$id)
   })
   
   
