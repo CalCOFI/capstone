@@ -1,0 +1,43 @@
+---
+title: "Depth_avg_plot"
+author: "PK"
+date: "4/22/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Set Up
+
+## Load in Libraries
+
+```{r}
+#read in data 
+library(readr)
+#plotting 
+library(ggplot2)
+library(tidyverse)
+#arranging plots in panel
+library(ggpubr)
+#splitting and averaging by unique values
+library(data.table)
+#Plotting with plotly
+library(plotly)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r}
+cast_bottle
+Cast_Field_Descriptions
+#descriptions of the variables in the cast and bottle preprocessed data 
+#descrip <- read_csv("data/Bottle Field Descriptions (1).csv", show_col_types = FALSE)
+```
+```{r}
+fig <- plot_ly() %>%
+```
+
