@@ -201,10 +201,8 @@ server <- function(input, output, session) {
   output$stationline <- renderPlot({station_line_plot()})
   output$range <- renderPrint({input$animation })
   #output$quarter <- renderText({input$qr})
-  
 } 
 
 ## ---------------
 ## DEPLOY
-
 shinyApp(ui,server)

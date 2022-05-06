@@ -1,22 +1,10 @@
-# packages ----
-if (!require("librarian")){
-  install.packages("librarian")
-  library(librarian)
-}
-librarian::shelf(
-  glue, here, htmltools, leaflet, lubridate, sp, tidyverse)
-
-# paths ----
-bottle_rda <- here("data/processed/bottle.RData")
-save_rda   <- here("scripts/shiny/spatial-pagepage_functions.RData")
-
-# check paths
-stopifnot(file.exists(bottle_rda))
-stopifnot(dir.exists(dirname(save_rda)))
-
-# load data
-load(bottle_rda)
-
+library(leaflet)
+library(sp)
+library(scales)
+library(htmltools)
+library(tidyverse)
+library(lubridate)
+load('data/processed/bottle.RData')
 # bottle <- bottle %>% filter(year(date) >= 2010)
 
 ## -----------------------------
@@ -44,9 +32,7 @@ get_map_data <- function(yr, qr){
                      .fns = list(ctr = mean, 
                                  var = var)),
               .groups = 'drop') %>%
-    mutate(
-      sta_id = glue("{line} {station}"),
-      loc_se = sqrt(lat_var + lon_var))
+    mutate(loc_se = sqrt(lat_var + lon_var))
   
   out <- bottle %>%
     # filter to specified year
@@ -77,52 +63,33 @@ get_map_data <- function(yr, qr){
   return(out)
 }
 
-
 # leaflet-specific
 point_color_fn <- colorFactor(c('#B73407', '#393939'), 
                               c(T, F))
 
-
-station_ids <- bottle %>% 
-  mutate(
-    sta_id = glue("{line} {station}")) %>% 
-  pull(sta_id) %>% 
-  unique()
 lines <- bottle %>% pull(line) %>% unique()
 
 # generate base map layer
 make_basemap <- function(){
   leaflet() %>% 
-  setView(lng = -121.33940, 
-          lat = 33.94975, 
-          zoom = 5) %>%
-  addProviderTiles(providers$Esri.OceanBasemap)
+    setView(lng = -121.33940, 
+            lat = 33.94975, 
+            zoom = 5) %>%
+    addProviderTiles(providers$Esri.OceanBasemap)
 }
 
 
 
 update_basemap <- function(basemap, filtered_data){
-  list_data <- filtered_data %>%
-    select(line, lon, lat) %>%
-    distinct(lon, lat, line) %>%
-    nest(data = c(lon, lat)) 
-  lines_df <- list_data %>% 
-    pull(data) %>%
-    lapply(function(df){st_linestring(as.matrix(df))}) %>%
-    st_sfc()
-  select_df <- lines_df %>% dplyr::select(line)
-  sf_df <- st_sf(select_df, geo)
   basemap %>%
-  clearMarkers() %>%
-  addCircleMarkers(
-    lat = ~lat_ctr, 
-    lng = ~lon_ctr, 
-    popup = ~label, 
-    color = ~point_color_fn(sampled_ix),
-    #once bottom_d added change radius = bottom depth/ or hypoxia 
-    radius = ~ -log(loc_se),
-    data = filtered_data,
-    layerId = ~sta_id)
+    clearMarkers() %>%
+    addCircleMarkers(lat = ~lat_ctr, 
+                     lng = ~lon_ctr, 
+                     popup = ~label, 
+                     color = ~point_color_fn(sampled_ix),
+                     #once bottom_d added change radius = bottom depth/ or hypoxia 
+                     radius = ~ -log(loc_se),
+                     data = filtered_data)
 }
 
 # custom transformation for depth profiles
@@ -160,9 +127,7 @@ rev_sqrt <- trans_new('revsqrt',
 #           axis.text.y = element_text(size = 8))
 # }
 
-
-# adding quarter as input so that we can highlight the corresponding facet title
-make_profile <- function(yr, lin, qr){
+make_profile <- function(yr, lin){
   stations_in_line <- bottle %>%
     filter(year(date) == yr,
            depth <= 1000,
@@ -184,7 +149,7 @@ make_profile <- function(yr, lin, qr){
                group = interaction(cast, quarter))) +
     geom_path(color = "black", alpha = 0.1) +
     geom_path(data = stations_in_line,
-              color = "aquamarine4",
+              color = "aquamarine3",
               size = 2,
               alpha = 0.1) +
     scale_y_continuous(trans = rev_sqrt) +
@@ -226,8 +191,8 @@ make_station_line <- function(yr, lin){
     geom_tile(aes(fill = oxygen, width = distance)) +
     # adjust color scale
     scale_fill_gradient2(low = '#E74C3C',
-                         mid = '#000000',
-                         high = '#1093eb',
+                         mid = '#F1C40F',
+                         high = '#3498DB',
                          midpoint = log10(1.4),
                          trans = 'log10') +
     # aesthetics
@@ -241,16 +206,16 @@ make_station_line <- function(yr, lin){
 }
 
 
+  
+  
+bottle %>% 
+  filter(depth == 50) %>% 
+  mean(oxygen, na.rm = TRUE)
 
-save(
-  list = ls(),
-  file = save_rda)
+mean(filter(bottle, depth == 50)$oxygen, na.rm = TRUE)
 
-## ----------------------
-## TESTS
-
-make_basemap() %>%
-  update_basemap(get_map_data(1984, 4))
-
-make_profile(2012, "093.3")
-make_station_line(2014, "093.3")
+  
+(subset(bottle, oxygen < 5.26)  / bottle)*100
+  
+  
+  
