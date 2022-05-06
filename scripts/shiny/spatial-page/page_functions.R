@@ -39,7 +39,7 @@ get_map_data <- function(yr, qr){
     filter(year(date) == yr,
            quarter == qr) %>%
     # select spatiotemporal info
-    select(depth, 
+    select(depth,
            line,
            station,
            date) %>%
@@ -81,19 +81,22 @@ make_basemap <- function(){
 
 
 update_basemap <- function(basemap, filtered_data){
+  filtered_data <- get_map_data(1984, 4)
+  basemap <- make_basemap()
+  
   list_data <- filtered_data %>%
-    select(line, lon, lat) %>%
-    distinct(lon, lat, line) %>%
-    nest(data = c(lon, lat)) 
+    select(line, lon_ctr, lat_ctr) %>%
+    distinct(lon_ctr, lat_ctr, line) %>%
+    nest(data = c(lon_ctr, lat_ctr)) 
   lines_df <- list_data %>% 
     pull(data) %>%
     lapply(function(df){st_linestring(as.matrix(df))}) %>%
     st_sfc()
-  select_df <- lines_df %>% dplyr::select(line)
-  sf_df <- st_sf(select_df, geo)
+  #select_df <- lines_df %>% dplyr::select(line)
+  #sf_df <- st_sf(select_df, geo)
   basemap %>%
   clearMarkers() %>%
-    addPolylines(data = sf_df) %>% 
+    addPolylines(data = lines_df) %>% 
   addCircleMarkers(lat = ~lat_ctr, 
                    lng = ~lon_ctr, 
                    popup = ~label, 
