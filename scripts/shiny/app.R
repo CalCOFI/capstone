@@ -174,10 +174,16 @@ server <- function(input, output, session) {
   # * map1_marker_click ----
   # When marker is clicked, update Station ID selector
   observe({
-    event <- input$map1_marker_click
+    event <<- input$map1_marker_click
     if (is.null(event))
       return()
     updateSelectInput(session, "sel_sta_id", selected=event$id)
+  })
+  observe({
+    event <- input$map1_marker_click
+    if (is.null(event))
+      return()
+    updateSelectInput(session, "lin", selected=strsplit(event$id," ")[[1]][[1]])
   })
   observe({
     event <- input$map2_marker_click
