@@ -49,9 +49,10 @@ ui <- navbarPage(
           'Line ID',
           lines,),
         selectInput(
-          'sel_sta_id',
-          'Station Line ID',
-          station_ids)),
+          'sta',
+          'Station ID',
+          stations,),
+        ),
       
       column(
         4,
@@ -114,9 +115,13 @@ ui <- navbarPage(
         ),
         verbatimTextOutput("range"),
         selectInput(
-          'sel_sta_id2',
-          'Station Line ID',
-          station_ids),
+          'lin2',
+          'Line ID',
+          lines,),
+        selectInput(
+          'sta2',
+          'Station ID',
+          stations,),
         h4("Select Parameters"),
         checkboxInput('oxy', 'Oxygen', value = FALSE, width = NULL),
         checkboxInput('temp', 'Temperature', value = FALSE, width = NULL),
@@ -174,10 +179,10 @@ server <- function(input, output, session) {
   # * map1_marker_click ----
   # When marker is clicked, update Station ID selector
   observe({
-    event <<- input$map1_marker_click
+    event <- input$map1_marker_click
     if (is.null(event))
       return()
-    updateSelectInput(session, "sel_sta_id", selected=event$id)
+    updateSelectInput(session, "sta", selected=strsplit(event$id," ")[[1]][[2]])
   })
   observe({
     event <- input$map1_marker_click
@@ -189,7 +194,13 @@ server <- function(input, output, session) {
     event <- input$map2_marker_click
     if (is.null(event))
       return()
-    updateSelectInput(session, "sel_sta_id2", selected=event$id)
+    updateSelectInput(session, "sta2", selected=strsplit(event$id," ")[[1]][[2]])
+  })
+  observe({
+    event <- input$map2_marker_click
+    if (is.null(event))
+      return()
+    updateSelectInput(session, "lin2", selected=strsplit(event$id," ")[[1]][[1]])
   })
   
   

@@ -82,12 +82,8 @@ get_map_data <- function(yr, qr){
 point_color_fn <- colorFactor(c('#B73407', '#393939'), 
                               c(T, F))
 
-station_ids <- bottle %>% 
-  mutate(
-    sta_id = glue("{line} {station}")) %>% 
-  pull(sta_id) %>% 
-  unique()
 lines <- bottle %>% pull(line) %>% unique()
+stations <- bottle %>% pull(station) %>% unique()
 
 # generate base map layer
 make_basemap <- function(){
