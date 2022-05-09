@@ -193,10 +193,18 @@ make_station_line <- function(yr, lin){
     geom_tile(aes(fill = oxygen, width = distance)) +
     # adjust color scale
     scale_fill_gradient2(low = '#E74C3C',
+                         high = '#059BFF',
                          mid = '#000000',
-                         high = '#1093eb',
-                         midpoint = log10(1.4),
-                         trans = 'log10') +
+                         midpoint = 1.4,
+                         limits = c(0.01, 6),
+                         # values = rescale(c(-.01,1.4,6)),
+                         na.value = "white",
+                         space = "Lab", 
+                         guide = "colourbar",
+                         n.breaks = 6, 
+                         # oob_squish(range = c(0.01, 6)), default for oor values is NA
+                         # trans = 'log10'
+                         ) +
     # aesthetics
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 90, 

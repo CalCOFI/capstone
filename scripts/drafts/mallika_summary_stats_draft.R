@@ -88,7 +88,8 @@ bottle %>%
   summarize(oxygen = median(oxygen, na.rm = T)) %>%
   ggplot(aes(x = year, y = oxygen)) +
   geom_point() +
-  geom_smooth()
+  geom_smooth() +
+  labs(title = "Avergage Oxygen concentration recorded over all stations and depths")
 
 # Look at values over time rather than the proportion measure.
 # tricky to interpret because sampling varies so much year to year
@@ -99,4 +100,25 @@ bottle %>%
 
 # For summary stats - only consider the years in which all the quarters were sampled
 
+bottle_by_year <- bottle %>%
+  select(year, quarter, oxygen) %>%
+  group_by(year, quarter) %>% 
+  summarize(mean(oxygen, na.rm = TRUE))
+
+bottle_by_quarter <- bottle_by_year %>%
+  pivot_wider(names_from = quarter, values_from = `mean(oxygen, na.rm = TRUE)`) %>%
+  select(year, `1`, `2`, `3`, `4`)
+
+years_with_all_qs <- na.omit(bottle_by_quarter)$year
+
+bottle %>%
+  filter(year == years_with_all_qs) %>%
+  group_by(year, quarter) %>%
+  summarize(oxygen = median(oxygen, na.rm = T)) %>%
+  ggplot(aes(x = year, y = oxygen)) +
+  geom_point() +
+  geom_smooth(se = FALSE) +
+  labs(title = "Avergage Oxygen concentration recorded over all stations and depths", 
+       subtitle = "Using only years that have all quarters sampled", 
+       caption = "Quarter 1 is Winter, 2 is Spring, 3 is Summer, 4 is Fall")
 
