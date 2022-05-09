@@ -9,9 +9,25 @@ library(hrbrthemes)
 load("data/processed/bottle.RData")
 
 
-sunbot<- subset(bottle, depth>=0 & depth <= 200)
+sunbot<- subset(bottle, depth>=0 & depth<=200)
 twibot <- subset(bottle, depth>200 & depth<=1000)
-dates<-as.data.frame(sunbot$date)
+midbot <- subset(bottle, depth>1000)
+
+bottle <- bottle %>% mutate(depth_fac = cut(depth, c(-.01, 200, 1000, Inf)))
+
+aggregate(temperature ~ depth_fac, bottle, mean)
+
+bottle%>%group_by(depth_fac, year(date), quarter)
+
+full <- bottle %>% 
+  ggplot(aes(x=date, y =temperature, color=depth_fac)) +
+  geom_point(na.rm = TRUE) +
+  #geom_line(aes(x=date,y=mean(temperature), color = "steelblue"), size = 5, na.rm = TRUE) +
+  xlab("Date") + 
+  ylab("Temperature") +  
+  scale_x_date(limit=c(as.Date("2000-01-01"),as.Date("2000-11-30")), date_labels = "%Y %b %d")  
+
+full
 
 #geom_line(aes(y=twibot$temperature),color = "steelblue", na.rm = TRUE)
 
@@ -66,7 +82,7 @@ ops <- ggplot(sunbot, aes(date,oxygen, group = depth)) +
     geom_line(na.rm = TRUE) +
     geom_point(aes(color=depth)) +
     xlab("Date") + 
-    ylab("OXygen mL/L") +  
+    ylab("Oxygen mL/L") +  
     scale_x_date(limit=c(as.Date("2000-01-01"),as.Date("2000-11-30")), date_labels = "%Y %b %d") 
   
 ops
@@ -75,7 +91,7 @@ opt <- ggplot(twibot, aes(date,oxygen, group = depth)) +
   geom_line(na.rm = TRUE) +
   geom_point(aes(color=depth)) +
   xlab("Date") + 
-  ylab("OXygen mL/L") +  
+  ylab("Oxygen mL/L") +  
   scale_x_date(limit=c(as.Date("2000-01-01"),as.Date("2000-11-30")), date_labels = "%Y %b %d") 
 
 opt
