@@ -100,3 +100,5 @@ preds_sf %>%
 # continuous or discrete scale? not sure, currently discrete
 
 # match mallika's color palette?
+
+# add legend
