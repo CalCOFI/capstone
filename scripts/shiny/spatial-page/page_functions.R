@@ -4,7 +4,7 @@ if (!require("librarian")){
   library(librarian)
 }
 librarian::shelf(
-  glue, here, htmltools, leaflet, lubridate, sp, sf, tidyverse)
+  glue, here, htmltools, leaflet, lubridate, sp, sf, tidyverse, rgdal, raster, rgeos)
 
 # paths ----
 bottle_rda <- here("data/processed/bottle.RData")
@@ -92,6 +92,9 @@ make_basemap <- function(){
 
 
 update_basemap <- function(basemap, filtered_data){
+  filtered_data <- get_map_data(1984, 4)
+  basemap <- make_basemap()
+  
   list_data <- filtered_data %>%
     select(line, lon, lat) %>%
     distinct(lon, lat, line) %>%
