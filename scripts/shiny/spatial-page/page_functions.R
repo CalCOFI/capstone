@@ -29,7 +29,7 @@ get_map_data <- function(yr, qr){
   station_locations <- bottle %>%
     filter(year(date) == yr) %>%
     # select location info
-    dplyr::select(lat, 
+    select(lat, 
            lon, 
            line, 
            station,
@@ -49,7 +49,7 @@ get_map_data <- function(yr, qr){
     filter(year(date) == yr,
            quarter == qr) %>%
     # select spatiotemporal info
-    dplyr::select(depth, 
+    select(depth, 
            line,
            station,
            date) %>%
@@ -68,7 +68,7 @@ get_map_data <- function(yr, qr){
     unite(label,
           contains('label'),
           sep = ' <br/> ') %>%
-    dplyr::select(-contains('label_line'))
+    select(-contains('label_line'))
   
   return(out)
 }
@@ -94,18 +94,18 @@ make_basemap <- function(){
 update_basemap <- function(basemap, filtered_data){
 
   list_data <- filtered_data %>%
-    dplyr::select(line, lon, lat) %>%
-    distinct(lon, lat, line) %>%
-    nest(data = c(lon, lat)) 
+    select(line, lon_ctr, lat_ctr) %>%
+    distinct(lon_ctr, lat_ctr, line) %>%
+    nest(data = c(lon_ctr, lat_ctr)) 
   lines_df <- list_data %>% 
     pull(data) %>%
     lapply(function(df){st_linestring(as.matrix(df))}) %>%
     st_sfc()
-  select_df <- lines_df %>% tidyverse::select(line)
-  sf_df <- st_sf(select_df, geo)
+  #select_df <- lines_df %>% dplyr::select(line)
+  #sf_df <- st_sf(select_df, geo)
   basemap %>%
   clearMarkers() %>%
-    addPolylines(data = sf_df) %>%
+    addPolylines(data = lines_df) %>%
   addCircleMarkers(lat = ~lat_ctr, 
                    lng = ~lon_ctr, 
                    popup = ~label, 
