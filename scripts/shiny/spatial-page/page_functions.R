@@ -4,7 +4,7 @@ if (!require("librarian")){
   library(librarian)
 }
 librarian::shelf(
-  glue, here, htmltools, leaflet, lubridate, sp, tidyverse)
+  glue, here, htmltools, leaflet, lubridate, sp, sf, tidyverse)
 
 # paths ----
 bottle_rda <- here("data/processed/bottle.RData")
