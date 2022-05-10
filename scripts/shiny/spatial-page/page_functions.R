@@ -4,6 +4,7 @@ library(scales)
 library(htmltools)
 library(tidyverse)
 library(lubridate)
+library(sf)
 load('data/processed/bottle.RData')
 # bottle <- bottle %>% filter(year(date) >= 2010)
 
