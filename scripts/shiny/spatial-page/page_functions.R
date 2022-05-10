@@ -8,7 +8,7 @@ librarian::shelf(
 
 # paths ----
 bottle_rda <- here("data/processed/bottle.RData")
-save_rda   <- here("scripts/shiny/spatial-pagepage_functions.RData")
+save_rda   <- here("scripts/shiny/spatial-page/page_functions.RData")
 
 # check paths
 stopifnot(file.exists(bottle_rda))
@@ -42,7 +42,9 @@ get_map_data <- function(yr, qr){
                      .fns = list(ctr = mean, 
                                  var = var)),
               .groups = 'drop') %>%
-    mutate(loc_se = sqrt(lat_var + lon_var))
+    mutate(
+      sta_id = glue("{line} {station}"),
+      loc_se = sqrt(lat_var + lon_var))
   
   out <- bottle %>%
     # filter to specified year
@@ -112,7 +114,8 @@ update_basemap <- function(basemap, filtered_data){
                    color = ~point_color_fn(sampled_ix),
                   #once bottom_d added change radius = bottom depth/ or hypoxia 
                    radius = ~ -log(loc_se),
-                   data = filtered_data)
+                   data = filtered_data,
+                   layerId = ~sta_id)
 }
 
 # custom transformation for depth profiles
@@ -234,7 +237,7 @@ make_station_line <- function(yr, lin){
 
 save(
   list = ls(),
-  file = 'scripts/shiny/spatial-page/page_functions.RData'
+  file = save_rda
 )
 
 ## ----------------------
