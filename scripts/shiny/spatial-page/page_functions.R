@@ -4,7 +4,7 @@ if (!require("librarian")){
   library(librarian)
 }
 librarian::shelf(
-  glue, here, htmltools, leaflet, lubridate, sp, sf, tidyverse, rgdal, raster, rgeos)
+  glue, here, htmltools, leaflet, lubridate, sp, sf, tidyverse, dplyr)
 
 # paths ----
 bottle_rda <- here("data/processed/bottle.RData")
@@ -29,7 +29,7 @@ get_map_data <- function(yr, qr){
   station_locations <- bottle %>%
     filter(year(date) == yr) %>%
     # select location info
-    select(lat, 
+    dplyr::select(lat, 
            lon, 
            line, 
            station,
@@ -49,7 +49,7 @@ get_map_data <- function(yr, qr){
     filter(year(date) == yr,
            quarter == qr) %>%
     # select spatiotemporal info
-    select(depth, 
+    dplyr::select(depth, 
            line,
            station,
            date) %>%
@@ -68,7 +68,7 @@ get_map_data <- function(yr, qr){
     unite(label,
           contains('label'),
           sep = ' <br/> ') %>%
-    select(-contains('label_line'))
+    dplyr::select(-contains('label_line'))
   
   return(out)
 }
@@ -92,22 +92,20 @@ make_basemap <- function(){
 
 
 update_basemap <- function(basemap, filtered_data){
-  filtered_data <- get_map_data(1984, 4)
-  basemap <- make_basemap()
-  
+
   list_data <- filtered_data %>%
-    select(line, lon, lat) %>%
+    dplyr::select(line, lon, lat) %>%
     distinct(lon, lat, line) %>%
     nest(data = c(lon, lat)) 
   lines_df <- list_data %>% 
     pull(data) %>%
     lapply(function(df){st_linestring(as.matrix(df))}) %>%
     st_sfc()
-  select_df <- lines_df %>% dplyr::select(line)
+  select_df <- lines_df %>% tidyverse::select(line)
   sf_df <- st_sf(select_df, geo)
   basemap %>%
   clearMarkers() %>%
-    addPolylines(data = sf_df) %>% 
+    addPolylines(data = sf_df) %>%
   addCircleMarkers(lat = ~lat_ctr, 
                    lng = ~lon_ctr, 
                    popup = ~label, 
