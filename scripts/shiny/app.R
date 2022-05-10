@@ -113,7 +113,16 @@ ui <- navbarPage(
           width = NULL,
           autoclose = TRUE
         ),
-        verbatimTextOutput("range"),
+        sliderInput(
+          "times",
+          "Press Play to Animate",
+          min = as.Date("1970-06-14", "%Y-%m-%d"),
+          max = as.Date("2020-01-26", "%Y-%m-%d"),
+          value = as.Date("1970-06-14", "%Y-%m-%d"),
+          animate = animationOptions(interval = 500, loop = TRUE),
+          step = 30,
+          timeFormat = "%b %Y",
+        ),
         selectInput(
           'lin2',
           'Line ID',
@@ -201,6 +210,12 @@ server <- function(input, output, session) {
     if (is.null(event))
       return()
     updateSelectInput(session, "lin2", selected=strsplit(event$id," ")[[1]][[1]])
+  })
+  observe({
+   val <- input$animation
+   updateSliderInput(session, "times", value = as.Date(val[1], "%Y-%m-%d"),
+                     min = as.Date(val[1],"%Y-%m-%d"), max = as.Date(val[2], "%Y-%m-%d"), 
+                     timeFormat = "%Y-%m-%d")
   })
   
   
