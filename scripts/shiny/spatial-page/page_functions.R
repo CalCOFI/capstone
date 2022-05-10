@@ -1,11 +1,21 @@
-library(leaflet)
-library(sp)
-library(scales)
-library(htmltools)
-library(tidyverse)
-library(lubridate)
-load('data/processed/bottle.RData')
-# bottle <- bottle %>% filter(year(date) >= 2010)
+# packages ----
+if (!require("librarian")){
+  install.packages("librarian")
+  library(librarian)
+}
+librarian::shelf(
+  glue, here, htmltools, leaflet, lubridate, sp, tidyverse)
+
+# paths ----
+bottle_rda <- here("data/processed/bottle.RData")
+save_rda   <- here("scripts/shiny/spatial-pagepage_functions.RData")
+
+# check paths
+stopifnot(file.exists(bottle_rda))
+stopifnot(dir.exists(dirname(save_rda)))
+
+# load data
+load(bottle_rda)
 
 ## -----------------------------
 ## SPATIAL PAGE
@@ -68,6 +78,7 @@ point_color_fn <- colorFactor(c('#B73407', '#393939'),
                               c(T, F))
 
 lines <- bottle %>% pull(line) %>% unique()
+stations <- bottle %>% pull(station) %>% unique()
 
 # generate base map layer
 make_basemap <- function(){
