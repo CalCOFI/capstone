@@ -15,19 +15,31 @@ midbot <- subset(bottle, depth>1000)
 
 bottle <- bottle %>% mutate(depth_fac = cut(depth, c(-.01, 200, 1000, Inf)))
 
-aggregate(temperature ~ depth_fac, bottle, mean)
+filter(bottle, depth <= 200 && depth >= -.1) %>% 
+  group_by(depth_fac, year(date), quarter) %>%
+  mean(temperature, na.rm=TRUE)
+  #mutate(avg_tmp = mean(temperature, na.rm =T), avg_oxy = mean(oxygen,na.rm=T))
+  
+tfull <- bottle %>% 
+  group_by(depth_fac) %>%
+  ggplot(aes(x=date, y=temperature, colour=depth_fac)) +
+  geom_point(na.rm=T) +
+  #geom_line() +
+  xlab("Date") + 
+  ylab("Temperature") +  
+  scale_x_date(limit=c(as.Date("2000-01-01"),as.Date("2004-11-30")), date_labels = "%Y %b %d")  
 
-bottle%>%group_by(depth_fac, year(date), quarter)
+tfull
 
-full <- bottle %>% 
-  ggplot(aes(x=date, y =temperature, color=depth_fac)) +
+ofull <- bottle %>% 
+  ggplot(aes(x=date, y =oxygen, color=depth_fac)) +
   geom_point(na.rm = TRUE) +
   #geom_line(aes(x=date,y=mean(temperature), color = "steelblue"), size = 5, na.rm = TRUE) +
   xlab("Date") + 
-  ylab("Temperature") +  
-  scale_x_date(limit=c(as.Date("2000-01-01"),as.Date("2000-11-30")), date_labels = "%Y %b %d")  
+  ylab("Oxygen mL/L") +  
+  scale_x_date(limit=c(as.Date("2000-01-01"),as.Date("2004-11-30")), date_labels = "%Y %b %d")  
 
-full
+ofull
 
 #geom_line(aes(y=twibot$temperature),color = "steelblue", na.rm = TRUE)
 
