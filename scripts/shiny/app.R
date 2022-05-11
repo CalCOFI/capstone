@@ -20,7 +20,9 @@ ui <- navbarPage(
       tags$head(
         # Include our custom CSS
         includeCSS("style.css"),
-        includeScript("gomap.js")),
+        includeScript("gomap.js"),
+        tags$style("#stationline{height:90vh !important;}"),
+        tags$style("#profile{height:90vh !important;}")),
       # If not using custom CSS, set height of leafletOutput to a number instead of percent
       leafletOutput("map1", width="100%", height="100%"),
       
@@ -60,7 +62,7 @@ ui <- navbarPage(
           id = "controls",class = "panel panel-default",
           fixed = TRUE,
           draggable = FALSE, top = 50, left = "auto", right = 0, bottom = "auto",
-          width = 600, height = 1000000, 
+          width = 600, height = 10000, 
           h2('Plots'),
           tabsetPanel(
             tabPanel(
