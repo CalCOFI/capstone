@@ -101,7 +101,7 @@ ui <- navbarPage(
         dateRangeInput(
           "animation",
           "Date Range",
-          start = "2000-01",
+          start = "1971-02",
           end = "2010-01",
           min = "1970-01",
           max = "2020-12",
@@ -119,10 +119,24 @@ ui <- navbarPage(
           min = as.Date("1970-06-14", "%Y-%m-%d"),
           max = as.Date("2020-01-26", "%Y-%m-%d"),
           value = as.Date("1970-06-14", "%Y-%m-%d"),
-          animate = animationOptions(interval = 500, loop = TRUE),
+          animate = animationOptions(interval = 4500, loop = TRUE),
           step = 30,
           timeFormat = "%b %Y",
         ),
+        numericInput(
+          'qr2',
+          'Quarter',
+          min = 1,
+          max = 4,
+          step = 1,
+          value = 1),
+        numericInput(
+          'yr2', # selection gets stored as `input$yr`
+          'Year', 
+          min = min(year(bottle$date), na.rm = T),
+          max = max(year(bottle$date), na.rm = T),
+          value = median(year(bottle$date), na.rm = T),
+          step = 1),
         selectInput(
           'lin2',
           'Line ID',
@@ -213,11 +227,28 @@ server <- function(input, output, session) {
   })
   observe({
    val <- input$animation
+   if (is.null(val))
+     return()
    updateSliderInput(session, "times", value = as.Date(val[1], "%Y-%m-%d"),
                      min = as.Date(val[1],"%Y-%m-%d"), max = as.Date(val[2], "%Y-%m-%d"), 
                      timeFormat = "%Y-%m-%d")
   })
-  
+  observe({
+    quarter_val <- quarter(bottle$date)[which(strptime(as.Date(input$times), format = "%y%m") %in% strptime(bottle$date, format = "%y%m"))]
+    updateNumericInput(session, "qr2", value = quarter_val)
+  })
+  observe({
+    quarter_val <- quarter(bottle$date)[which(strptime(as.Date(input$times), format = "%y%m") %in% strptime(bottle$date, format = "%y%m"))]
+    if (is.null(quarter_val))
+      return()
+    updateNumericInput(session, "qr2", value = quarter_val)
+  })
+  observe({
+    year_val <- strptime(as.Date(input$times), format = "%y")
+    if (is.null(year_val))
+      return()
+    updateNumericInput(session, "yr2", value = year_val)
+  })
   
   ## PROFILE PANEL
   # user retrieve data by year/quarter
