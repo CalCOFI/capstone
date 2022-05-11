@@ -236,12 +236,13 @@ server <- function(input, output, session) {
                      min = as.Date(val[1],"%Y-%m-%d"), max = as.Date(val[2], "%Y-%m-%d"), 
                      timeFormat = "%Y-%m-%d")
   })
-  reactive({
+  observe({
     quarter_val <- get_quarter(input$times)
+    browser()
     updateNumericInput(session, "qr2", value = quarter_val)
   })
-  reactive({
-    year_val <- strptime(as.Date(input$times), format = "%y")
+  observe({
+    year_val <- format(input$times, "%Y")
     updateNumericInput(session, "yr2", value = year_val)
   })
   
