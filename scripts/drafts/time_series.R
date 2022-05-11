@@ -8,102 +8,40 @@ library(dplyr)
 library(hrbrthemes)
 load("data/processed/bottle.RData")
 
-
-sunbot<- subset(bottle, depth>=0 & depth<=200)
-twibot <- subset(bottle, depth>200 & depth<=1000)
-midbot <- subset(bottle, depth>1000)
-
 bottle <- bottle %>% mutate(depth_fac = cut(depth, c(-.01, 200, 1000, Inf)))
 
-filter(bottle, depth <= 200 && depth >= -.1) %>% 
-  group_by(depth_fac, year(date), quarter) %>%
-  mean(temperature, na.rm=TRUE)
-  #mutate(avg_tmp = mean(temperature, na.rm =T), avg_oxy = mean(oxygen,na.rm=T))
-  
-tfull <- bottle %>% 
-  group_by(depth_fac) %>%
+
+x<-aggregate(list(bottle$temperature,bottle$date), list(bottle$year,bottle$quarter,bottle$depth_fac), FUN=mean, na.rm=T)
+colnames(x) <- c('year', 'quarter','depth_fac','temperature','date')
+x <- x[order(x$year, x$quarter),]
+rownames(x)<-1:nrow(x)
+#x<-mutate(x,ID = as.numeric(rownames(x)))
+x
+
+tfull <- x %>% 
   ggplot(aes(x=date, y=temperature, colour=depth_fac)) +
-  geom_point(na.rm=T) +
+  geom_point(aes(shape=as.factor(quarter)),na.rm=T) +
   #geom_line() +
   xlab("Date") + 
-  ylab("Temperature") +  
-  scale_x_date(limit=c(as.Date("2000-01-01"),as.Date("2004-11-30")), date_labels = "%Y %b %d")  
+  ylab("Temperature") +
+  scale_x_date(limit=c(as.Date("2000-01-01"),as.Date("2004-11-30")), date_labels = "%Y %b %d") 
 
 tfull
 
-ofull <- bottle %>% 
-  ggplot(aes(x=date, y =oxygen, color=depth_fac)) +
-  geom_point(na.rm = TRUE) +
-  #geom_line(aes(x=date,y=mean(temperature), color = "steelblue"), size = 5, na.rm = TRUE) +
-  xlab("Date") + 
-  ylab("Oxygen mL/L") +  
-  scale_x_date(limit=c(as.Date("2000-01-01"),as.Date("2004-11-30")), date_labels = "%Y %b %d")  
+y<-aggregate(bottle$oxygen, list(bottle$year,bottle$quarter,bottle$depth_fac), FUN=mean, na.rm=T)
+colnames(y) <- c('year','quarter','depth_fac','oxygen')
+y <- y[order(y$year, y$quarter),]
+rownames(y)<-1:nrow(y)
+y<-mutate(y,ID = as.numeric(rownames(y)))
 
+
+ofull <- y %>% 
+  ggplot(aes(x=ID, y=oxygen, colour=depth_fac)) +
+  geom_point(na.rm=T) +
+  #geom_line() +
+  xlab("Date") + 
+  ylab("Oxygen") 
+  
 ofull
 
-#geom_line(aes(y=twibot$temperature),color = "steelblue", na.rm = TRUE)
-
-# data_summary <- function(data, varname, groupnames){
-#   require(plyr)
-#   summary_func <- function(x, col){
-#     c(mean = mean(x[[col]], na.rm=TRUE),
-#       sd = sd(x[[col]], na.rm=TRUE))
-#   }
-#   data_sum<-ddply(data, groupnames, .fun=summary_func,
-#                   varname)
-#   data_sum <- rename(data_sum, c("mean" = varname))
-#   return(data_sum)
-# }
-# 
-# df3 <- data_summary(sunbot, varname="temperature", 
-#                     groupnames=c("depth", "date"))
-
-#geom_line(aes(lineteype=depth),na.rm = TRUE) +
-  #geom_point(aes(color=depth))
 #geom_errorbar(aes(ymin=temperature-sd, ymax = temperature+sd, width = .1))
-
-tps <- ggplot(sunbot, aes(date,temperature, group = depth)) +
-  geom_line(na.rm = TRUE) +
-  geom_point(aes(color=depth)) +
-  xlab("Date") + 
-  ylab("Temperature") +  
-  scale_x_date(limit=c(as.Date("2000-01-01"),as.Date("2000-11-30")), date_labels = "%Y %b %d") 
-  
-tps
-
-tpt <- ggplot(twibot, aes(date,temperature, group = depth)) +
-  geom_line(na.rm = TRUE) +
-  geom_point(aes(color=depth)) +
-  xlab("Date") + 
-  ylab("Temperature") +  
-  scale_x_date(limit=c(as.Date("2000-01-01"),as.Date("2000-11-30")), date_labels = "%Y %b %d") 
-
-tpt
-
-#as.data.frame(aggregate(oxygen~date, data=sunbot, mean))$oxygen
-
-# op <- ggplot(sunbot, aes(x=unique(date), y=as.data.frame(aggregate(oxygen~date, data=sunbot, mean))$oxygen)) +
-#   geom_point(na.rm = TRUE)
-#   #geom_line(aes(y=bot0$oxygen), color = "blue", na.rm = TRUE) + 
-#   xlab("Date") +
-#   scale_x_date(limit=c(as.Date("2000-01-01"),as.Date("2000-07-01")),
-#                 date_labels = "%Y %b %d")
-
-  
-ops <- ggplot(sunbot, aes(date,oxygen, group = depth)) +
-    geom_line(na.rm = TRUE) +
-    geom_point(aes(color=depth)) +
-    xlab("Date") + 
-    ylab("Oxygen mL/L") +  
-    scale_x_date(limit=c(as.Date("2000-01-01"),as.Date("2000-11-30")), date_labels = "%Y %b %d") 
-  
-ops
-
-opt <- ggplot(twibot, aes(date,oxygen, group = depth)) +
-  geom_line(na.rm = TRUE) +
-  geom_point(aes(color=depth)) +
-  xlab("Date") + 
-  ylab("Oxygen mL/L") +  
-  scale_x_date(limit=c(as.Date("2000-01-01"),as.Date("2000-11-30")), date_labels = "%Y %b %d") 
-
-opt
