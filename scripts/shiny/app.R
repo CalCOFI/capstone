@@ -121,17 +121,15 @@ ui <- navbarPage(
           min = as.Date("1970-06-14", "%Y-%m-%d"),
           max = as.Date("2020-01-26", "%Y-%m-%d"),
           value = as.Date("1970-06-14", "%Y-%m-%d"),
-          animate = animationOptions(interval = 500, loop = TRUE),
+          animate = animationOptions(interval = 800, loop = TRUE),
           step = 30,
           timeFormat = "%b %Y",
         ),
-        numericInput(
+        selectInput(
           'qr2',
           'Quarter',
-          min = 1,
-          max = 4,
-          step = 1,
-          value = 1),
+          c(1,2,3,4),
+          selected = 1),
         numericInput(
           'yr2', # selection gets stored as `input$yr`
           'Year', 
@@ -237,9 +235,7 @@ server <- function(input, output, session) {
                      timeFormat = "%Y-%m-%d")
   })
   observe({
-    quarter_val <- get_quarter(input$times)
-    browser()
-    updateNumericInput(session, "qr2", value = quarter_val)
+    updateSelectInput(session, "qr2", selected = get_quarter(input$times))
   })
   observe({
     year_val <- format(input$times, "%Y")
