@@ -235,10 +235,6 @@ server <- function(input, output, session) {
   })
   observe({
     quarter_val <- quarter(bottle$date)[which(strptime(as.Date(input$times), format = "%y%m") %in% strptime(bottle$date, format = "%y%m"))]
-    updateNumericInput(session, "qr2", value = quarter_val)
-  })
-  observe({
-    quarter_val <- quarter(bottle$date)[which(strptime(as.Date(input$times), format = "%y%m") %in% strptime(bottle$date, format = "%y%m"))]
     if (is.null(quarter_val))
       return()
     updateNumericInput(session, "qr2", value = quarter_val)
