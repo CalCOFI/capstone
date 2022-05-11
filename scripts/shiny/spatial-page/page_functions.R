@@ -232,7 +232,14 @@ make_station_line <- function(yr, lin){
     labs(x = 'Distance from shore (Nautical Miles)', y = 'Depth (m)',
          fill='Oxygen (mL O2/L seawater)') 
 }
-
+get_quarter <- function(time){
+  bottle %>%
+         group_by(year, quarter) %>%
+         summarize(across(date, .fns = list(min = min, max = max)), .groups = "drop") %>%
+         filter(date_max > ymd("1972-02-06")) %>%
+         slice_min(date_max) %>% 
+         pull(quarter)
+}
 
 
 save(

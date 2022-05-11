@@ -6,8 +6,10 @@ librarian::shelf(
   here, htmltools, leaflet, lubridate, scales, shiny, shinydashboard, sp, tidyverse)
 
 fxns_r <- here("scripts/shiny/spatial-page/page_functions.R")
+bottle_rda <- here("data/processed/bottle.RData")
 stopifnot(file.exists(fxns_r))
 source(fxns_r)
+load(bottle_rda)
 
 # UI ----
 #* Spatial tab ----
@@ -101,8 +103,8 @@ ui <- navbarPage(
         dateRangeInput(
           "animation",
           "Date Range",
-          start = "1971-02",
-          end = "2010-01",
+          start = "1990-06-14",
+          end = "2010-01-26",
           min = "1970-01",
           max = "2020-12",
           format = "yyyy-mm",
@@ -119,7 +121,7 @@ ui <- navbarPage(
           min = as.Date("1970-06-14", "%Y-%m-%d"),
           max = as.Date("2020-01-26", "%Y-%m-%d"),
           value = as.Date("1970-06-14", "%Y-%m-%d"),
-          animate = animationOptions(interval = 4500, loop = TRUE),
+          animate = animationOptions(interval = 500, loop = TRUE),
           step = 30,
           timeFormat = "%b %Y",
         ),
@@ -135,7 +137,7 @@ ui <- navbarPage(
           'Year', 
           min = min(year(bottle$date), na.rm = T),
           max = max(year(bottle$date), na.rm = T),
-          value = median(year(bottle$date), na.rm = T),
+          value = 1992,
           step = 1),
         selectInput(
           'lin2',
@@ -183,6 +185,7 @@ server <- function(input, output, session) {
   # map ----
   # user retrieve data by year
   map_data <- reactive({get_map_data(input$yr, input$qr)})
+  map_data2 <- reactive({get_map_data(input$yr2, input$qr2)})
   
   # base map layer (will show default year 2000)
   output$map1 <- renderLeaflet({make_basemap()})
@@ -196,7 +199,7 @@ server <- function(input, output, session) {
     tab1 <- leafletProxy('map1') %>%
       update_basemap(map_data())
     tab2 <- leafletProxy('map2') %>%
-      update_basemap(map_data())
+      update_basemap(map_data2())
   })
   
   # * map1_marker_click ----
@@ -233,16 +236,12 @@ server <- function(input, output, session) {
                      min = as.Date(val[1],"%Y-%m-%d"), max = as.Date(val[2], "%Y-%m-%d"), 
                      timeFormat = "%Y-%m-%d")
   })
-  observe({
-    quarter_val <- quarter(bottle$date)[which(strptime(as.Date(input$times), format = "%y%m") %in% strptime(bottle$date, format = "%y%m"))]
-    if (is.null(quarter_val))
-      return()
+  reactive({
+    quarter_val <- get_quarter(input$times)
     updateNumericInput(session, "qr2", value = quarter_val)
   })
-  observe({
+  reactive({
     year_val <- strptime(as.Date(input$times), format = "%y")
-    if (is.null(year_val))
-      return()
     updateNumericInput(session, "yr2", value = year_val)
   })
   
