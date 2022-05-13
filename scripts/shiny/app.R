@@ -6,8 +6,10 @@ librarian::shelf(
   here, htmltools, leaflet, lubridate, scales, shiny, shinydashboard, sp, tidyverse)
 
 fxns_r <- here("scripts/shiny/spatial-page/page_functions.R")
+bottle_rda <- here("data/processed/bottle.RData")
 stopifnot(file.exists(fxns_r))
 source(fxns_r)
+load(bottle_rda)
 
 # UI ----
 #* Spatial tab ----
@@ -103,8 +105,8 @@ ui <- navbarPage(
         dateRangeInput(
           "animation",
           "Date Range",
-          start = "2000-01",
-          end = "2010-01",
+          start = "1990-06-14",
+          end = "2010-01-26",
           min = "1970-01",
           max = "2020-12",
           format = "yyyy-mm",
@@ -115,7 +117,28 @@ ui <- navbarPage(
           width = NULL,
           autoclose = TRUE
         ),
-        verbatimTextOutput("range"),
+        sliderInput(
+          "times",
+          "Press Play to Animate",
+          min = as.Date("1970-06-14", "%Y-%m-%d"),
+          max = as.Date("2020-01-26", "%Y-%m-%d"),
+          value = as.Date("1970-06-14", "%Y-%m-%d"),
+          animate = animationOptions(interval = 800, loop = TRUE),
+          step = 30,
+          timeFormat = "%b %Y",
+        ),
+        selectInput(
+          'qr2',
+          'Quarter',
+          1:4,
+          selected = 1),
+        numericInput(
+          'yr2', # selection gets stored as `input$yr`
+          'Year', 
+          min = min(year(bottle$date), na.rm = T),
+          max = max(year(bottle$date), na.rm = T),
+          value = 1992,
+          step = 1),
         selectInput(
           'lin2',
           'Line ID',
@@ -162,6 +185,7 @@ server <- function(input, output, session) {
   # map ----
   # user retrieve data by year
   map_data <- reactive({get_map_data(input$yr, input$qr)})
+  map_data2 <- reactive({get_map_data(input$yr2, input$qr2)})
   
   # base map layer (will show default year 2000)
   output$map1 <- renderLeaflet({make_basemap()})
@@ -175,7 +199,7 @@ server <- function(input, output, session) {
     tab1 <- leafletProxy('map1') %>%
       update_basemap(map_data())
     tab2 <- leafletProxy('map2') %>%
-      update_basemap(map_data())
+      update_basemap(map_data2())
   })
   
   # * map1_marker_click ----
@@ -204,7 +228,24 @@ server <- function(input, output, session) {
       return()
     updateSelectInput(session, "lin2", selected=strsplit(event$id," ")[[1]][[1]])
   })
-  
+  observe({
+   val <- input$animation
+   if (is.null(val))
+     return()
+   updateSliderInput(session, "times", value = as.Date(val[1], "%Y-%m-%d"),
+                     min = as.Date(val[1],"%Y-%m-%d"), max = as.Date(val[2], "%Y-%m-%d"), 
+                     timeFormat = "%Y-%m-%d")
+  })
+  observe({
+    quarter_val <- tibble(
+      date = format(input$times, "%Y-%m-%d") %>% as.Date()) %>% 
+      mutate(quarter = lubridate::quarter(date))
+    updateSelectInput(session, "qr2", selected = as.character(quarter_val))
+  })
+  observe({
+    year_val <- format(input$times, "%Y")
+    updateNumericInput(session, "yr2", value = year_val)
+  })
   
   ## PROFILE PANEL
   # user retrieve data by year/quarter
