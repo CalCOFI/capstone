@@ -128,7 +128,7 @@ ui <- navbarPage(
         selectInput(
           'qr2',
           'Quarter',
-          c(1,2,3,4),
+          1:4,
           selected = 1),
         numericInput(
           'yr2', # selection gets stored as `input$yr`
@@ -235,7 +235,10 @@ server <- function(input, output, session) {
                      timeFormat = "%Y-%m-%d")
   })
   observe({
-    updateSelectInput(session, "qr2", selected = get_quarter(input$times))
+    quarter_val <- tibble(
+      date = format(input$times, "%Y-%m-%d") %>% as.Date()) %>% 
+      mutate(quarter = lubridate::quarter(date))
+    updateSelectInput(session, "qr2", selected = as.character(quarter_val))
   })
   observe({
     year_val <- format(input$times, "%Y")
