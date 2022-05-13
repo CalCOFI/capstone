@@ -123,7 +123,7 @@ ui <- navbarPage(
           min = as.Date(as.Date(min((bottle$date), na.rm = T), "%Y-%m-%d"), "%Y-%m-%d"),
           max = as.Date(as.Date(max((bottle$date), na.rm = T), "%Y-%m-%d"), "%Y-%m-%d"),
           value = as.Date(as.Date(min((bottle$date), na.rm = T), "%Y-%m-%d"), "%Y-%m-%d"),
-          animate = animationOptions(interval = 800, loop = TRUE),
+          animate = animationOptions(interval = 400, loop = TRUE),
           step = 30,
           timeFormat = "%b %Y",
         ),
