@@ -154,8 +154,7 @@ rev_sqrt <- trans_new('revsqrt',
 # }
 
 
-# adding quarter as input so that we can highlight the corresponding facet title
-make_profile <- function(yr, lin, qr){
+make_profile <- function(yr, lin){
   stations_in_line <- bottle %>%
     filter(year(date) == yr,
            depth <= 1000,
@@ -192,7 +191,7 @@ make_profile <- function(yr, lin, qr){
           axis.text.y = element_text(size = 8))
 }
 
-
+# add labels for nearshore to off shore on each side
 
 make_station_line <- function(yr, lin){
   bottle %>%
@@ -219,10 +218,18 @@ make_station_line <- function(yr, lin){
     geom_tile(aes(fill = oxygen, width = distance)) +
     # adjust color scale
     scale_fill_gradient2(low = '#E74C3C',
+                         high = '#059BFF',
                          mid = '#000000',
-                         high = '#1093eb',
                          midpoint = log10(1.4),
-                         trans = 'log10') +
+                         # limits = c(0.01, 6),
+                         # values = rescale(c(-.01,1.4,6)),
+                         na.value = "gray",
+                         # space = "Lab", 
+                         # guide = "colourbar",
+                         # n.breaks = 6, 
+                         # oob_squish(range = c(0.01, 6)), default for oor values is NA
+                         trans = 'log10'
+                         ) +
     # aesthetics
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 90, 
@@ -231,6 +238,140 @@ make_station_line <- function(yr, lin){
           panel.grid = element_blank()) +
     labs(x = 'Distance from shore (Nautical Miles)', y = 'Depth (m)',
          fill='Oxygen (mL O2/L seawater)') 
+}
+
+
+
+# Editing function to take parameter of interest - first trying ChlorA
+#Go light green to gree
+
+make_station_line_chlor <- function(yr, lin){
+  bottle %>%
+    # filter to year, quarter, and station of interest
+    filter(year == yr, 
+           # quarter == qr,
+           line == lin,
+           depth <= 250,
+           chlor >= 0) %>%
+    # bin depths into roughly even numbers of observations
+    mutate(depth_interval = cut_number(depth, 8)) %>%
+    # aggregate within depth bins
+    mutate(quarter = replace(quarter, quarter == 1, "Q1 - Winter"), 
+           quarter = replace(quarter, quarter == 2, "Q2 - Spring"), 
+           quarter = replace(quarter, quarter == 3, "Q3 - Summer"), 
+           quarter = replace(quarter, quarter == 4, "Q4 - Fall")) %>%
+    group_by(depth_interval,
+             quarter,
+             distance) %>%
+    summarize(chlorophyll = median(chlorophyll, na.rm = T)) %>% # tinker with summary stat
+    ggplot(aes(x = distance, y = fct_rev(depth_interval))) +
+    facet_wrap(~ quarter, 
+               # scales = "free_x",
+               nrow = 4) +
+    # using geom_tile instead of raster in order to create boxes of different widths
+    geom_tile(aes(fill = chlorophyll, width = distance)) +
+    # adjust color scale
+    scale_fill_gradient(low = '#E74C3C',
+                        high = '#83C70C',
+                        space = 'Lab',
+                        na.value = "gray",
+                        guide = "colourbar",
+                        aesthetics = "fill",
+                        trans = 'log10'
+    ) +
+    # aesthetics
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 90, 
+                                     size = 8,
+                                     vjust = 0.5),
+          panel.grid = element_blank()) +
+    labs(x = 'Distance from shore (Nautical Miles)', y = 'Depth (m)',
+         fill='Chlorophyll (micro grams/L seawater)') 
+}
+
+make_station_line_temp <- function(yr, lin){
+  bottle %>%
+    # filter to year, quarter, and station of interest
+    filter(year == yr, 
+           # quarter == qr,
+           line == lin) %>%
+    # bin depths into roughly even numbers of observations
+    mutate(depth_interval = cut_number(depth, 10)) %>%
+    # aggregate within depth bins
+    mutate(quarter = replace(quarter, quarter == 1, "Q1 - Winter"), 
+           quarter = replace(quarter, quarter == 2, "Q2 - Spring"), 
+           quarter = replace(quarter, quarter == 3, "Q3 - Summer"), 
+           quarter = replace(quarter, quarter == 4, "Q4 - Fall")) %>%
+    group_by(depth_interval,
+             quarter,
+             distance) %>%
+    summarize(temperature = median(temperature, na.rm = T)) %>% # tinker with summary stat
+    ggplot(aes(x = distance, y = fct_rev(depth_interval))) +
+    facet_wrap(~ quarter, 
+               # scales = "free_x",
+               nrow = 4) +
+    # using geom_tile instead of raster in order to create boxes of different widths
+    geom_tile(aes(fill = temperature, width = distance)) +
+    # adjust color scale
+    scale_fill_gradient(low = '#000000',
+                        high = '#059BFF',
+                        space = 'Lab',
+                        na.value = "gray",
+                        guide = "colourbar",
+                        aesthetics = "fill",
+                        trans = 'log10'
+    ) +
+    # aesthetics
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 90, 
+                                     size = 8,
+                                     vjust = 0.5),
+          panel.grid = element_blank()) +
+    labs(x = 'Distance from shore (Nautical Miles)', y = 'Depth (m)',
+         fill='Temperature (˚C)') 
+}
+
+
+make_station_line_salinity <- function(yr, lin){
+  bottle %>%
+    # filter to year, quarter, and station of interest
+    filter(year == yr, 
+           # quarter == qr,
+           line == lin) %>%
+    # bin depths into roughly even numbers of observations
+    mutate(depth_interval = cut_number(depth, 10)) %>%
+    # aggregate within depth bins
+    mutate(quarter = replace(quarter, quarter == 1, "Q1 - Winter"), 
+           quarter = replace(quarter, quarter == 2, "Q2 - Spring"), 
+           quarter = replace(quarter, quarter == 3, "Q3 - Summer"), 
+           quarter = replace(quarter, quarter == 4, "Q4 - Fall")) %>%
+    group_by(depth_interval,
+             quarter,
+             distance) %>%
+    summarize(salinity = median(salinity, na.rm = T)) %>% # tinker with summary stat
+    ggplot(aes(x = distance, y = fct_rev(depth_interval))) +
+    facet_wrap(~ quarter, 
+               # scales = "free_x",
+               nrow = 4) +
+    # using geom_tile instead of raster in order to create boxes of different widths
+    geom_tile(aes(fill = salinity, width = distance)) +
+    # adjust color scale
+    scale_fill_gradient(low = '#000000',
+                        high = '#08D1A2',
+                        space = 'Lab',
+                        na.value = "gray",
+                        guide = "colourbar",
+                        aesthetics = "fill",
+                        trans = 'log10'
+    ) +
+    # aesthetics
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 90, 
+                                     size = 8,
+                                     vjust = 0.5),
+          panel.grid = element_blank()) +
+    labs(x = 'Distance from shore (Nautical Miles)', y = 'Depth (m)',
+         fill='Salinity (Practical Salinity Scale)') 
 }
 
 
@@ -247,3 +388,8 @@ make_basemap() %>%
 
 make_profile(2012, "093.3")
 make_station_line(2014, "093.3")
+make_station_line_chlor(2000, "093.3")
+#Do a green/cooler color for the cooler temp to red warm for temperature
+make_station_line_temp(2019, "080.0")
+# pink scale for pink salt
+make_station_line_salinity(2014, "093.3")
