@@ -106,7 +106,8 @@ update_basemap <- function(basemap, filtered_data){
   #select_df <- lines_df %>% dplyr::select(line)
   #sf_df <- st_sf(select_df, geo)
   basemap %>%
-  clearMarkers() %>%
+  clearMarkers() %>% 
+    clearShapes()%>%
     addPolylines(data = lines_df) %>%
   addCircleMarkers(lat = ~lat_ctr, 
                    lng = ~lon_ctr, 
