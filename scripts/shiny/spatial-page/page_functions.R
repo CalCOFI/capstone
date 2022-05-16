@@ -108,7 +108,9 @@ update_basemap <- function(basemap, filtered_data){
   basemap %>%
   clearMarkers() %>% 
     clearShapes()%>%
-    addPolylines(data = lines_df) %>%
+    addPolylines(data = lines_df,
+                 color = "black", 
+                 opacity = 0.3) %>%
   addCircleMarkers(lat = ~lat_ctr, 
                    lng = ~lon_ctr, 
                    popup = ~label, 
