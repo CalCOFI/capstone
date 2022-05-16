@@ -81,14 +81,14 @@ st_geometry(preds_sf) <- st_geometry(pred_grid)
 preds_sf_smooth <- smooth(preds_sf, method = "ksmooth", smoothness = 0.1)
 
 
-plot(preds_sf_smooth)
+plot(preds_sf)
 
 # plot
-
+#replaced with the kriging data 
 
 pal_fn <- colorQuantile(palette = c("red", "black", "blue"), NULL, n = 5) # try other colorX(...) leaflet functions
 
-preds_sf_smooth %>%
+preds_sf %>%
   st_transform(4326) %>%
   leaflet() %>% 
   setView(lng = -121.33940, 
@@ -113,3 +113,6 @@ preds_sf_smooth %>%
 # match mallika's color palette? [X]
 
 # add legend []
+
+#make two sections one for smoothing another for plot in another script to interact
+#with loaded data and put 
