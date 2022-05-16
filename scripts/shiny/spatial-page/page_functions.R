@@ -252,7 +252,7 @@ make_station_line_chlor <- function(yr, lin){
            # quarter == qr,
            line == lin,
            depth <= 250,
-           chlor >= 0) %>%
+           chlorophyll >= 0) %>%
     # bin depths into roughly even numbers of observations
     mutate(depth_interval = cut_number(depth, 8)) %>%
     # aggregate within depth bins
