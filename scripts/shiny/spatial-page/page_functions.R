@@ -1,11 +1,21 @@
-library(leaflet)
-library(sp)
-library(scales)
-library(htmltools)
-library(tidyverse)
-library(lubridate)
-load('data/processed/bottle.RData')
-# bottle <- bottle %>% filter(year(date) >= 2010)
+# packages ----
+if (!require("librarian")){
+  install.packages("librarian")
+  library(librarian)
+}
+librarian::shelf(
+  glue, here, htmltools, leaflet, lubridate, sp, sf, tidyverse, dplyr)
+
+# paths ----
+bottle_rda <- here("data/processed/bottle.RData")
+save_rda   <- here("scripts/shiny/spatial-page/page_functions.RData")
+
+# check paths
+stopifnot(file.exists(bottle_rda))
+stopifnot(dir.exists(dirname(save_rda)))
+
+# load data
+load(bottle_rda)
 
 ## -----------------------------
 ## SPATIAL PAGE
@@ -32,7 +42,9 @@ get_map_data <- function(yr, qr){
                      .fns = list(ctr = mean, 
                                  var = var)),
               .groups = 'drop') %>%
-    mutate(loc_se = sqrt(lat_var + lon_var))
+    mutate(
+      sta_id = glue("{line} {station}"),
+      loc_se = sqrt(lat_var + lon_var))
   
   out <- bottle %>%
     # filter to specified year
@@ -68,6 +80,7 @@ point_color_fn <- colorFactor(c('#B73407', '#393939'),
                               c(T, F))
 
 lines <- bottle %>% pull(line) %>% unique()
+stations <- bottle %>% pull(station) %>% unique()
 
 # generate base map layer
 make_basemap <- function(){
@@ -81,26 +94,28 @@ make_basemap <- function(){
 
 
 update_basemap <- function(basemap, filtered_data){
+
   list_data <- filtered_data %>%
-    select(line, lon, lat) %>%
-    distinct(lon, lat, line) %>%
-    nest(data = c(lon, lat)) 
+    select(line, lon_ctr, lat_ctr) %>%
+    distinct(lon_ctr, lat_ctr, line) %>%
+    nest(data = c(lon_ctr, lat_ctr)) 
   lines_df <- list_data %>% 
     pull(data) %>%
     lapply(function(df){st_linestring(as.matrix(df))}) %>%
     st_sfc()
-  select_df <- lines_df %>% dplyr::select(line)
-  sf_df <- st_sf(select_df, geo)
+  #select_df <- lines_df %>% dplyr::select(line)
+  #sf_df <- st_sf(select_df, geo)
   basemap %>%
   clearMarkers() %>%
-    addPolylines(data = sf_df) %>% 
+    addPolylines(data = lines_df) %>%
   addCircleMarkers(lat = ~lat_ctr, 
                    lng = ~lon_ctr, 
                    popup = ~label, 
                    color = ~point_color_fn(sampled_ix),
                   #once bottom_d added change radius = bottom depth/ or hypoxia 
                    radius = ~ -log(loc_se),
-                   data = filtered_data)
+                   data = filtered_data,
+                   layerId = ~sta_id)
 }
 
 # custom transformation for depth profiles
@@ -224,6 +239,7 @@ make_station_line <- function(yr, lin){
     labs(x = 'Distance from shore (Nautical Miles)', y = 'Depth (m)',
          fill='Oxygen (mL O2/L seawater)') 
 }
+
 
 
 # Editing function to take parameter of interest - first trying ChlorA
@@ -359,10 +375,9 @@ make_station_line_salinity <- function(yr, lin){
 }
 
 
-
 save(
   list = ls(),
-  file = 'scripts/shiny/spatial-page/page_functions.RData'
+  file = save_rda
 )
 
 ## ----------------------
