@@ -56,6 +56,14 @@ ui <- navbarPage(
           'sta',
           'Station ID',
           stations,),
+        h4("Select Parameters"),
+        radioButtons('param', 'Parameters', 
+                     choices = 
+                       c("Oxygen" = "oxy",
+                       "Temperature" = "temp",
+                       "pH" = "ph",
+                       "Chlorophyll" = "chlorophyll"),
+                     selected = "oxy",),
       ),
       
       column(
@@ -86,7 +94,7 @@ ui <- navbarPage(
         id="cite",
         'Data compiled for ', tags$em('CalCOFI'), ' by Us')),
   ),
-  #* temporal tab ----  
+#* temporal tab ----  
   tabPanel(
     "Temporal Tab",
     div(
@@ -147,11 +155,6 @@ ui <- navbarPage(
           'sta2',
           'Station ID',
           stations,),
-        h4("Select Parameters"),
-        checkboxInput('oxy', 'Oxygen', value = FALSE, width = NULL),
-        checkboxInput('temp', 'Temperature', value = FALSE, width = NULL),
-        checkboxInput('ph', 'pH', value = FALSE, width = NULL),
-        
       ),
       column(
         4,
