@@ -6,9 +6,10 @@ min_yr <- 1970
 
 # stable_url <- 'https://calcofi.org/downloads/database/CalCOFI_Database_194903-202001_csv_22Sep2021.zip'
 # bottle_raw <- read_csv(file = stable_url, n_max = 15)
-
+bottle_raw_data <- here('data/raw/194903-202001_Bottle.zip')
+cast_raw_data <- here('data/raw/194903-202001_Cast.csv')
 # read in column names from bottle data
-bottle_cols <- read_csv(file = 'data/raw/194903-202001_Bottle.zip',
+bottle_cols <- read_csv(file = bottle_raw_data,
                         col_names = F,
                         col_types = 'c',
                         n_max = 1) %>%
@@ -28,7 +29,7 @@ selected_cols <- bottle_cols %>%
 selected_col_ix <- selected_cols %>% pull(colnum)
 
 # filter cast data by year
-selected_casts <- read_csv(file = 'data/raw/194903-202001_Cast.csv',
+selected_casts <- read_csv(file = cast_raw_data,
                            col_select = c(Cst_Cnt, Year)) %>%
   filter(Year >= min_yr)
 
@@ -54,7 +55,7 @@ selected_cast_cnt <- selected_casts %>% pull(Cst_Cnt)
 # bottle_read_start <- min(selected_row_ix) - 1
 
 # read bottle data with column selection
-bottle_raw <- read_csv(file = 'data/raw/194903-202001_Bottle.zip',
+bottle_raw <- read_csv(file = bottle_raw_data,
                        skip = 0,
                        n_max = Inf,
                        col_select = all_of(selected_col_ix),
@@ -63,7 +64,7 @@ bottle_raw <- read_csv(file = 'data/raw/194903-202001_Bottle.zip',
   filter(Cst_Cnt %in% selected_cast_cnt)
 
 # merge cast data
-bottle <- read_csv(file = 'data/raw/194903-202001_Cast.csv',
+bottle <- read_csv(file = cast_raw_data,
                    col_select = c(Cst_Cnt, Sta_ID, Cast_ID, 
                                   Date, Quarter, Lat_Dec, Lon_Dec, 
                                   Year, Distance, Bottom_D)) %>%
@@ -95,5 +96,6 @@ bottle <- read_csv(file = 'data/raw/194903-202001_Cast.csv',
 # nrow(bottle) == nrow(bottle_raw)
 
 # export
-save(bottle, file = 'data/processed/bottle.RData') # as r binary
+bottle_rda <- here("data/processed/bottle.RData")
+save(bottle, file = bottle_rda) # as r binary
 # write_csv(bottle, file = 'bottle-processed.csv') # as csv
