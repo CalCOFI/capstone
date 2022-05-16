@@ -13,8 +13,8 @@ library(rgdal)
 # grab data from a year/quarter and process for kriging
 
 load("data/processed/bottle.RData")
-yr <- 2000
-qr <- 3
+yr <- 2005
+qr <- 1
 
 kdata_sf <- bottle %>% 
   filter(year == yr, quarter == qr, depth < 500) %>%
@@ -78,7 +78,7 @@ preds_sf <- fit$krige_output %>%
 st_geometry(preds_sf) <- st_geometry(pred_grid)
 
 
-preds_sf_smooth <- smooth(preds_sf, method = "ksmooth", smoothness = 0.1)
+#preds_sf <- smooth(preds_sf, method = "ksmooth", smoothness = 0.1)
 
 
 plot(preds_sf)
@@ -86,7 +86,7 @@ plot(preds_sf)
 # plot
 #replaced with the kriging data 
 
-pal_fn <- colorQuantile(palette = c("red", "black", "blue"), NULL, n = 5) # try other colorX(...) leaflet functions
+pal_fn <- colorNumeric(palette = c("#E74C3C", "#000000", "#059BFF"), NULL, n = 5) # try other colorX(...) leaflet functions
 
 preds_sf %>%
   st_transform(4326) %>%
@@ -99,9 +99,9 @@ preds_sf %>%
               stroke = F,
               fillOpacity = 0.8,
               smoothFactor = 0.1)  %>%
-  addLegend("topright", colors = c("red", "black", "blue"), labels = c("low", "medium", "high"),
-            title = "Dissolved Oxygen Concentration",
-            opacity = 1
+  addLegend("topright", pal = pal_fn, values = ~pred,
+           title = "Dissolved Oxygen Concentration",
+           opacity = 1
   )
 
 ## comments
@@ -113,6 +113,15 @@ preds_sf %>%
 # match mallika's color palette? [X]
 
 # add legend []
+
+#<<<<<<< Updated upstream
+#make two sections one for smoothing another for plot in another script to interact
+#with loaded data and put 
+#=======
+#continuous color scale; try something other than quantiles to see DO values in 
+#use the actual number values 
+#>>>>>>> Stashed changes
+
 
 #make two sections one for smoothing another for plot in another script to interact
 #with loaded data and put 
