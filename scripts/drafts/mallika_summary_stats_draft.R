@@ -122,3 +122,14 @@ bottle %>%
        subtitle = "Using only years that have all quarters sampled", 
        caption = "Quarter 1 is Winter, 2 is Spring, 3 is Summer, 4 is Fall")
 
+# Looking at line 77
+make_station_line(1972, "077.0")
+make_station_line(1986, "077.0")
+
+bottle_imdt <- bottle %>%
+  filter(line == "076.7",
+         station == "070.0",
+         depth == 50)
+
+lm(oxygen ~ date, data = bottle_imdt) %>%
+  summary()
