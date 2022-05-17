@@ -13,6 +13,7 @@ load("data/processed/bottle.RData")
 
 bottle_nested <- bottle %>%
   # drop depths below 500m and missing oxygen values
+  #filter on year because will take forever 
   filter(depth < 500, 
          !is.na(oxygen)) %>%
   # bin depth into layers (ADJUST BINS??)

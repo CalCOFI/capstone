@@ -19,7 +19,7 @@ bottle_cols <- read_csv(file = 'data/raw/194903-202001_Bottle.zip',
   select(colnum, name)
 
 # obtain indices for columns of interest
-colname_strings <- 'O2ml|Salnty|Depth|Cnt|ID|Date|Quarter|degC'
+colname_strings <- 'O2ml|Salnty|Depth|Cnt|ID|Date|Quarter|degC|ChlorA'
 selected_cols <- bottle_cols %>%
   filter(str_detect(name, colname_strings)) %>%
   arrange(colnum)
@@ -83,7 +83,8 @@ bottle <- read_csv(file = 'data/raw/194903-202001_Cast.csv',
          cast = Cst_Cnt,
          year = Year,
          distance = Distance,
-         bottomd = Bottom_D) %>%
+         bottomd = Bottom_D,
+         chlorophyll = ChlorA) %>%
   # drop unused variables
   select(-c(Cast_ID, Btl_Cnt, Depth_ID, R_Depth, Date)) %>%
   # split id into station and line
@@ -91,7 +92,7 @@ bottle <- read_csv(file = 'data/raw/194903-202001_Cast.csv',
 
 
 # row dimensions shouldn't change
-nrow(bottle) == nrow(bottle_raw)
+# nrow(bottle) == nrow(bottle_raw)
 
 # export
 save(bottle, file = 'data/processed/bottle.RData') # as r binary
