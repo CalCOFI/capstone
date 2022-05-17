@@ -61,7 +61,7 @@ ui <- navbarPage(
                      choices = 
                        c("Oxygen" = "oxy",
                        "Temperature" = "temp",
-                       "pH" = "ph",
+                       "Salinity" = "sal",
                        "Chlorophyll" = "chlorophyll"),
                      selected = "oxy",),
       ),
@@ -255,15 +255,27 @@ server <- function(input, output, session) {
   profile_plot <- reactive({
     make_profile(input$yr, input$lin)
   })
+  
   station_line_plot <- reactive({
-    make_station_line(input$yr, input$lin)
+    if(input$param == "oxy"){
+      make_station_line(input$yr, input$lin)
+    }else{
+      if(input$param == "temp"){
+        make_station_line_temp(input$yr, input$lin)
+      }else{
+        if(input$param == "sal"){
+          make_station_line_salinity(input$yr, input$lin)
+        }
+        else{
+          make_station_line_chlor(input$yr, input$lin)
+        }
+      }
+    }
   })
   
   # plot depth profiles
   output$profile <- renderPlot({profile_plot()})
   output$stationline <- renderPlot({station_line_plot()})
-  output$range <- renderPrint({input$animation })
-  #output$quarter <- renderText({input$qr})
   
 } 
 
