@@ -11,20 +11,34 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r echo = FALSE}
 library(plotly)
+library(lubridate)
+library(dplyr)
 ```
 
 ```{r}
 bottle_rda <- here("data/processed/bottle.RData")
-fig <- plot_ly() %>% 
-  add_lines(x = c("a","b","c"), y = c(1,3,2))%>% 
-  layout(title="sample figure", xaxis = list(title = 'x'), yaxis = list(title = 'y'), plot_bgcolor = "#c7daec") 
+load(bottle_rda)
+```
 
-str(fig$x) 
+```{r}
+bottle
 ```
 
 
 ```{r echo=FALSE}
+#Get the average oxygen for a given time period
+start <- as.Date("07-02-2000", "%m-%d-%Y")
+end <- as.Date("07-02-2010", "%m-%d-%Y")
+lineID <- 093.3
+stationID <- 080.0
+```
 
+```{r echo=FALSE}
+#Find all oxygen value in the date range at a specific line, station
+bottle %>%
+    subset(start < date & end > date) %>%
+    group_by(station, line)  %>%
+    select(oxygen)
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
