@@ -81,13 +81,14 @@ ui <- navbarPage(
               height = "100%",
               status = 'primary',
               solidHeader = T,
-              plotOutput("profile", width = "100%", height = "800px",)),
+              plotOutput("profile", width = "100%", height = "800px",),
+              downloadButton(outputId = "prof_down", label = "Download the plot")),
             tabPanel(
               title = "Station Line Profiles",
               width = "100%",
               height = "200%",
-              plotOutput('stationline', width = "100%", height = "800px",)),
-            textOutput("quarter"),
+              plotOutput('stationline', width = "100%", height = "800px",),
+              downloadButton(outputId = "sta_down", label = "Download the plot")),
           ),
         )),
       tags$div(
@@ -272,6 +273,42 @@ server <- function(input, output, session) {
       }
     }
   })
+  # downloadHandler contains 2 arguments as functions, namely filename, content
+  output$sta_down <- downloadHandler(
+    filename =  function() {
+      paste("station-line", input$yr, input$qr, input$sta, input$lin, sep="_")
+    },
+    # content is a function with argument file. content writes the plot to the device
+    content = function(file) {
+    png(file) # open the png device
+      if(input$param == "oxy"){
+        make_station_line(input$yr, input$lin)
+      }else{
+        if(input$param == "temp"){
+          make_station_line_temp(input$yr, input$lin)
+        }else{
+          if(input$param == "sal"){
+            make_station_line_salinity(input$yr, input$lin)
+          }
+          else{
+            make_station_line_chlor(input$yr, input$lin)
+          }
+        }
+      }
+    dev.off()  # turn the device off
+      
+    })
+  output$prof_down <- downloadHandler(
+    filename =  function() {
+      paste("profile-plot", input$yr, input$qr, input$sta, input$lin, sep="_")
+    },
+    # content is a function with argument file. content writes the plot to the device
+    content = function(file){
+      png(file) # open the png device
+      make_profile(input$yr, input$lin)
+      dev.off()  # turn the device off
+      
+    })
   
   # plot depth profiles
   output$profile <- renderPlot({profile_plot()})
