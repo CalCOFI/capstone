@@ -16,7 +16,7 @@ load(bottle_rda)
 ui <- navbarPage(
   "CalCOFI", id="nav",
   tabPanel(
-    "Interactive map",
+    "Spatial Trends",
     div(
       class="outer",
       tags$head(
@@ -50,7 +50,7 @@ ui <- navbarPage(
           value = 1),
         selectInput(
           'lin',
-          'Line ID',
+          'Transect (Line ID)',
           lines,),
         selectInput(
           'sta',
@@ -73,7 +73,7 @@ ui <- navbarPage(
           fixed = TRUE,
           draggable = FALSE, top = 50, left = "auto", right = 0, bottom = "auto",
           width = 600, height = 10000, 
-          h2('Plots'),
+          h2('Profiles'),
           tabsetPanel(
             tabPanel(
               title = 'Depth profiles',
@@ -84,7 +84,7 @@ ui <- navbarPage(
               plotOutput("profile", width = "100%", height = "800px",),
               downloadButton(outputId = "prof_down", label = "Download the plot")),
             tabPanel(
-              title = "Station Line Profiles",
+              title = "Transect Profile",
               width = "100%",
               height = "200%",
               plotOutput('stationline', width = "100%", height = "800px",),
@@ -97,7 +97,7 @@ ui <- navbarPage(
   ),
 #* temporal tab ----  
   tabPanel(
-    "Temporal Tab",
+    "Temporal Trends",
     div(
       class="outer",
       tags$head(
