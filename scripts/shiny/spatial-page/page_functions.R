@@ -448,7 +448,7 @@ save(
 ## TESTS
 
 make_basemap() %>%
-  update_basemap(get_map_data(1984, 4))
+  update_basemap(get_map_data(1984, 4), get_kriging_data(1984,4,as.factor('[0,50)')))
 
 make_profile(2012, "093.3")
 make_station_line(2014, "093.3")

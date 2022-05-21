@@ -204,7 +204,6 @@ server <- function(input, output, session) {
   # plot user's selection
   observe({
     input$nav
-    
     tab1 <- leafletProxy('map1') %>%
       update_basemap(map_data(), kriging_data())
     tab2 <- leafletProxy('map2') %>%
