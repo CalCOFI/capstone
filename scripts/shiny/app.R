@@ -49,6 +49,10 @@ ui <- navbarPage(
           step = 1,
           value = 1),
         selectInput(
+          'dpth',
+          'Depth layer',
+          depths,),
+        selectInput(
           'lin',
           'Transect (Line ID)',
           lines,),
@@ -190,6 +194,7 @@ server <- function(input, output, session) {
   # user retrieve data by year
   map_data <- reactive({get_map_data(input$yr, input$qr)})
   map_data2 <- reactive({get_map_data(input$yr2, input$qr2)})
+  kriging_data <- reactive({get_kriging_data(input$yr, input$qr, input$dpth)})
   
   # base map layer (will show default year 2000)
   output$map1 <- renderLeaflet({make_basemap()})
@@ -201,9 +206,9 @@ server <- function(input, output, session) {
     input$nav
     
     tab1 <- leafletProxy('map1') %>%
-      update_basemap(map_data())
+      update_basemap(map_data(), kriging_data())
     tab2 <- leafletProxy('map2') %>%
-      update_basemap(map_data2())
+      update_basemap(map_data2(), NULL)
   })
   
   # * map1_marker_click ----

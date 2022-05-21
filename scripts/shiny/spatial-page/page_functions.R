@@ -4,18 +4,21 @@ if (!require("librarian")){
   library(librarian)
 }
 librarian::shelf(
-  glue, here, htmltools, leaflet, lubridate, sp, sf, tidyverse, dplyr)
+  glue, here, htmltools, leaflet, lubridate, sp, sf, tidyverse, scales)
 
 # paths ----
 bottle_rda <- here("data/processed/bottle.RData")
 save_rda   <- here("scripts/shiny/spatial-page/page_functions.RData")
+kriging_rda <- here('results/iterated-kriging-out.RData')
 
 # check paths
 stopifnot(file.exists(bottle_rda))
 stopifnot(dir.exists(dirname(save_rda)))
+stopifnot(file.exists(kriging_rda))
 
 # load data
 load(bottle_rda)
+load(kriging_rda)
 
 ## -----------------------------
 ## SPATIAL PAGE
@@ -62,7 +65,7 @@ get_map_data <- function(yr, qr){
     # merge station info (center lat and long)
     full_join(station_locations, by = c('line', 'station')) %>%
     # define indicator for whether a station was sampled
-    mutate(sampled_ix = is.na(maxdepth)) %>%
+    mutate(sampled_ix = !is.na(maxdepth)) %>%
     # create labels to display on hover
     mutate(label_line1 = paste('Line ID', line, sep = ' '),
            label_line2 = paste('Station ID', station, sep = ' '),
@@ -75,12 +78,33 @@ get_map_data <- function(yr, qr){
   return(out)
 }
 
+get_kriging_data <- function(yr, qr, dpth){
+  kriging_filtered <- kriging_out %>% 
+    filter(year == yr,
+           quarter == qr,
+           depth_layer == dpth) %>%
+    pull(preds)
+  
+  if(length(kriging_filtered) > 0){
+    ## TG UPDATE HERE?? smoothing takes too long
+    out <- kriging_filtered[[1]] %>%
+      st_transform(4326)
+  }else{
+    out <- NULL
+  }
+  
+  return(out)
+}
+
 # leaflet-specific
-point_color_fn <- colorFactor(c('#B73407', '#393939'), 
+point_color_fn <- colorFactor(c('#393939', '#393939'), 
                               c(T, F))
+raster_color_fn <- colorNumeric(palette = c("#E74C3C", "#000000", "#059BFF"),
+                                NULL, n = 5)
 
 lines <- bottle %>% pull(line) %>% unique()
 stations <- bottle %>% pull(station) %>% unique()
+depths <- kriging_out %>% pull(depth_layer) %>% unique()
 
 # generate base map layer
 make_basemap <- function(){
@@ -91,11 +115,17 @@ make_basemap <- function(){
   addProviderTiles(providers$Esri.OceanBasemap)
 }
 
+# yr <- 2010
+# qr <- 1
+# dpth <- depths[1]
+# filtered_data <- get_map_data(yr, qr)
+# basemap <- make_basemap()
+# kriging_data <- get_kriging_data(yr, qr, dpth)
 
-
-update_basemap <- function(basemap, filtered_data){
+update_basemap <- function(basemap, filtered_data, kriging_data){
 
   list_data <- filtered_data %>%
+    arrange(line, station) %>%
     select(line, lon_ctr, lat_ctr) %>%
     distinct(lon_ctr, lat_ctr, line) %>%
     nest(data = c(lon_ctr, lat_ctr)) 
@@ -103,23 +133,54 @@ update_basemap <- function(basemap, filtered_data){
     pull(data) %>%
     lapply(function(df){st_linestring(as.matrix(df))}) %>%
     st_sfc()
-  #select_df <- lines_df %>% dplyr::select(line)
-  #sf_df <- st_sf(select_df, geo)
-  basemap %>%
-  clearMarkers() %>% 
-    clearShapes()%>%
-    addPolylines(data = lines_df,
-                 color = "black", 
-                 opacity = 0.3) %>%
-  addCircleMarkers(lat = ~lat_ctr, 
-                   lng = ~lon_ctr, 
-                   popup = ~label, 
-                   color = ~point_color_fn(sampled_ix),
-                  #once bottom_d added change radius = bottom depth/ or hypoxia 
-                   radius = ~ -log(loc_se),
-                   data = filtered_data,
-                   layerId = ~sta_id)
+  points_df <- filtered_data %>%
+    st_as_sf(coords = c('lon_ctr', 'lat_ctr')) %>%
+    st_set_crs(4326)
+  
+  if(is.null(kriging_data)){
+    basemap %>%
+      clearMarkers() %>% 
+      clearShapes()%>%
+      addPolylines(data = lines_df,
+                   color = "black", 
+                   opacity = 0.3,
+                   weight = 1.5) %>%
+      addCircleMarkers(data = points_df, 
+                       popup = ~label, 
+                       color = ~point_color_fn(sampled_ix),
+                       radius = ~ if_else(sampled_ix, 4, 1.5),
+                       stroke = F,
+                       fillOpacity = 0.5)
+  }else{
+    basemap %>%
+      clearMarkers() %>% 
+      clearShapes()%>%
+      addPolylines(data = lines_df,
+                   color = "black", 
+                   opacity = 0.3,
+                   weight = 1.5) %>%
+      addCircleMarkers(data = points_df, 
+                       popup = ~ label, 
+                       color = ~ point_color_fn(sampled_ix),
+                       radius = ~ if_else(sampled_ix, 4, 1.5),
+                       stroke = F,
+                       fillOpacity = 0.5) %>%
+      # TG UPDATE HERE
+      addPolygons(data = kriging_data,
+                  fillColor = ~ raster_color_fn(pred),
+                  stroke = F,
+                  fillOpacity = 0.5,
+                  smoothFactor = 0.1) 
+  }
+
 }
+
+# yr <- 1995
+# qr <- 3
+# dpth <- depths[2]
+# make_basemap() %>%
+#   update_basemap(get_map_data(yr, qr),
+#                  get_kriging_data(yr, qr, dpth))
 
 # custom transformation for depth profiles
 rev_sqrt <- trans_new('revsqrt', 
