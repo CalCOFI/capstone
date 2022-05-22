@@ -447,13 +447,13 @@ save(
 ## ----------------------
 ## TESTS
 
-make_basemap() %>%
-  update_basemap(get_map_data(1984, 4), get_kriging_data(1984,4,as.factor('[0,50)')))
-
-make_profile(2012, "093.3")
-make_station_line(2014, "093.3")
-make_station_line_chlor(2000, "093.3")
-#Do a green/cooler color for the cooler temp to red warm for temperature
-make_station_line_temp(2019, "080.0")
-# pink scale for pink salt
-make_station_line_salinity(2014, "093.3")
+# make_basemap() %>%
+#   update_basemap(get_map_data(1984, 4), get_kriging_data(1984,4,as.factor('[0,50)')))
+# 
+# make_profile(2012, "093.3")
+# make_station_line(2014, "093.3")
+# make_station_line_chlor(2000, "093.3")
+# #Do a green/cooler color for the cooler temp to red warm for temperature
+# make_station_line_temp(2019, "080.0")
+# # pink scale for pink salt
+# make_station_line_salinity(2014, "093.3")
