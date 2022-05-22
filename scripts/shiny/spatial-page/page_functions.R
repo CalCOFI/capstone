@@ -150,7 +150,8 @@ update_basemap <- function(basemap, filtered_data, kriging_data){
                        color = ~point_color_fn(sampled_ix),
                        radius = ~ if_else(sampled_ix, 4, 1.5),
                        stroke = F,
-                       fillOpacity = 0.5)
+                       fillOpacity = 0.5,
+                       layerId = ~ sta)
   }else{
     basemap %>%
       clearMarkers() %>% 
@@ -164,7 +165,8 @@ update_basemap <- function(basemap, filtered_data, kriging_data){
                        color = ~ point_color_fn(sampled_ix),
                        radius = ~ if_else(sampled_ix, 4, 1.5),
                        stroke = F,
-                       fillOpacity = 0.5) %>%
+                       fillOpacity = 0.5, 
+                       layerId = ~ sta) %>%
       # TG UPDATE HERE
       addPolygons(data = kriging_data,
                   fillColor = ~ raster_color_fn(pred),
