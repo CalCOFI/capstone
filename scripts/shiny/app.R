@@ -5,11 +5,15 @@ if (!require("librarian")){
 librarian::shelf(
   here, htmltools, leaflet, lubridate, scales, shiny, shinydashboard, sp, tidyverse)
 
-fxns_r <- here("scripts/shiny/spatial-page/page_functions.R")
-bottle_rda <- here("data/processed/bottle.RData")
-stopifnot(file.exists(fxns_r))
-source(fxns_r)
-load(bottle_rda)
+# fxns_r <- here("scripts/shiny/spatial-page/page_functions.R")
+# bottle_rda <- here("data/processed/bottle.RData")
+# stopifnot(file.exists(fxns_r))
+# source(fxns_r)
+# load(bottle_rda)
+
+env_rda <- here('scripts/shiny/spatial-page/page_functions.RData')
+stopifnot(file.exists(env_rda))
+load(env_rda)
 
 # UI ----
 #* Spatial tab ----
