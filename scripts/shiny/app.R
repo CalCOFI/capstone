@@ -72,6 +72,9 @@ ui <- navbarPage(
                        "Salinity" = "sal",
                        "Chlorophyll" = "chlorophyll"),
                      selected = "oxy",),
+        checkboxInput('show_krig',
+                      "Show Smooth Data", 
+                      value = TRUE),
       ),
       
       column(
@@ -198,7 +201,12 @@ server <- function(input, output, session) {
   # user retrieve data by year
   map_data <- reactive({get_map_data(input$yr, input$qr)})
   map_data2 <- reactive({get_map_data(input$yr2, input$qr2)})
-  kriging_data <- reactive({get_kriging_data(input$yr, input$qr, input$dpth)})
+  kriging_data <- reactive({
+    if(input$show_krig == TRUE){
+    get_kriging_data(input$yr, input$qr, input$dpth)}
+    else{
+      NULL}
+    })
   
   # base map layer (will show default year 2000)
   output$map1 <- renderLeaflet({make_basemap()})
@@ -209,7 +217,7 @@ server <- function(input, output, session) {
   observe({
     input$nav
     tab1 <- leafletProxy('map1') %>%
-      update_basemap(map_data(), kriging_data())
+        update_basemap(map_data(), kriging_data())
     tab2 <- leafletProxy('map2') %>%
       update_basemap(map_data2(), NULL)
   })
