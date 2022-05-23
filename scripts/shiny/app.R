@@ -15,10 +15,10 @@ load(bottle_rda)
 #* Spatial tab ----
 ui <- navbarPage(
   "CalCOFI", id="nav",
-  tabPanel{
-    "Home"
-    h1("CalCOFI App")
-  }
+  tabPanel(
+    "Home",
+    h1("CalCOFI App"),
+  ),
   tabPanel(
     "Spatial Trends",
     div(
