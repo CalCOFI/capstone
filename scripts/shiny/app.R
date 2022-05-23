@@ -292,8 +292,8 @@ server <- function(input, output, session) {
       The visualizations use data collected by the California Cooperative Fisheries and Oceanic Investigations (CalCOFI). 
       Data is collected by collecting seawater at numerous discrete depths (between 0 - 500+ meters) at" ),
       tags$a("sampling station", href = "https://calcofi.org/sampling-info/station-positions/"),
-      HTML("locations that are arranged along parallel “station lines” extending perpendicular off the coast. CalCOFI samples these stations 
-      quarterly — in Winter, Spring, Summer, and Fall of each year — and has been doing so for over 50 years."),
+      HTML("locations that are arranged along parallel station lines extending perpendicular off the coast. CalCOFI samples these stations 
+      quarterly in Winter, Spring, Summer, and Fall of each year and has been doing so for over 50 years."),
       #size = "l",
       easyClose = FALSE,
     ),
