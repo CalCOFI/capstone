@@ -26,9 +26,7 @@ ui <- navbarPage(
       tags$head(
         # Include our custom CSS
         includeCSS("style.css"),
-        includeScript("gomap.js"),
-        tags$style("#stationline{height:90vh !important;}"),
-        tags$style("#profile{height:90vh !important;}")),
+        includeScript("gomap.js"),),
       # If not using custom CSS, set height of leafletOutput to a number instead of percent
       leafletOutput("map1", width="100%", height="100%"),
       
@@ -98,6 +96,7 @@ ui <- navbarPage(
       tags$div(
         id="cite",
         'Data compiled for ', tags$em('CalCOFI'), ' by Us')),
+    actionButton("show", label = NULL, icon = icon("info"))
   ),
 #* temporal tab ----  
   tabPanel(
@@ -276,6 +275,29 @@ server <- function(input, output, session) {
         }
       }
     }
+  })
+  #---- Intro to CalCOFI modal
+  output[["image"]] <- renderImage({
+    list(src = "ims/calcofi_header.png",
+         alt = "This is alternate text",
+         width = "100%",
+         height = "75px")}, deleteFile = FALSE)
+  observeEvent(input$show, {
+    showModal(modalDialog(
+      title = "How to use this app",
+      imageOutput("image", height = "100px"),
+      HTML(
+      "This app is a data visualization tool that explores the following
+      properties of the seawater off the coast of California: dissolved oxygen concentration, temperature, salinity, and chlorophyll. <br>
+      The visualizations use data collected by the California Cooperative Fisheries and Oceanic Investigations (CalCOFI). 
+      Data is collected by collecting seawater at numerous discrete depths (between 0 - 500+ meters) at" ),
+      tags$a("sampling station", href = "https://calcofi.org/sampling-info/station-positions/"),
+      HTML("locations that are arranged along parallel “station lines” extending perpendicular off the coast. CalCOFI samples these stations 
+      quarterly — in Winter, Spring, Summer, and Fall of each year — and has been doing so for over 50 years."),
+      #size = "l",
+      easyClose = FALSE,
+    ),
+    )
   })
   # downloadHandler contains 2 arguments as functions, namely filename, content
   output$sta_down <- downloadHandler(

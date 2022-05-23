@@ -2,6 +2,17 @@ input[type="number"] {
   max-width: 80%;
 }
 
+#show {
+  /*display:block;*/
+  height: 35px;
+  width: 35px;
+  border-radius: 50%;
+  border: 3px solid black;
+  position: absolute;
+  bottom: 30px;
+  left: 10px;
+}
+
 div.outer {
   position: fixed;
   top: 41px;
@@ -10,6 +21,14 @@ div.outer {
   bottom: 0;
   overflow: hidden;
   padding: 0;
+}
+
+
+#stationline{
+  height:90vh !important;
+}
+#profile{
+  height:90vh !important;
 }
 
 /* Customize fonts */
