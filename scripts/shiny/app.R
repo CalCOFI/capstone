@@ -55,15 +55,15 @@ ui <- navbarPage(
         selectInput(
           'dpth',
           'Depth layer',
-          depths,),
+          depths),
         selectInput(
           'lin',
           'Transect (Line ID)',
-          lines,),
+          lines),
         selectInput(
           'sta',
           'Station ID',
-          stations,),
+          stations),
         h4("Select Parameters"),
         radioButtons('param', 'Parameters', 
                      choices = 
@@ -71,7 +71,7 @@ ui <- navbarPage(
                        "Temperature" = "temp",
                        "Salinity" = "sal",
                        "Chlorophyll" = "chlorophyll"),
-                     selected = "oxy",),
+                     selected = "oxy")
       ),
       
       column(
@@ -96,12 +96,12 @@ ui <- navbarPage(
               width = "100%",
               height = "200%",
               plotOutput('stationline', width = "100%", height = "800px",),
-              downloadButton(outputId = "sta_down", label = "Download the plot")),
-          ),
+              downloadButton(outputId = "sta_down", label = "Download the plot"))
+          )
         )),
       tags$div(
         id="cite",
-        'Data compiled for ', tags$em('CalCOFI'), ' by Us')),
+        'Data compiled for ', tags$em('CalCOFI'), ' by Us'))
   ),
 #* temporal tab ----  
   tabPanel(
@@ -142,7 +142,7 @@ ui <- navbarPage(
           value = as.Date(as.Date(min((bottle$date), na.rm = T), "%Y-%m-%d"), "%Y-%m-%d"),
           animate = animationOptions(interval = 400, loop = TRUE),
           step = 30,
-          timeFormat = "%b %Y",
+          timeFormat = "%b %Y"
         ),
         selectInput(
           'qr2',
@@ -159,11 +159,11 @@ ui <- navbarPage(
         selectInput(
           'lin2',
           'Line ID',
-          lines,),
+          lines),
         selectInput(
           'sta2',
           'Station ID',
-          stations,),
+          stations)
       ),
       column(
         4,
@@ -184,11 +184,11 @@ ui <- navbarPage(
             tabPanel(
               title = "Depth Average Plots",
               width = "100%",
-              height = "100%",),),
+              height = "100%"))
         )
-      ),
-    ),
-  ),
+      )
+    )
+  )
 )
 
 # SERVER ----
