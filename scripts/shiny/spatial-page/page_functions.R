@@ -274,7 +274,7 @@ make_station_line_chlor <- function(yr, lin){
     group_by(depth_interval,
              quarter,
              distance) %>%
-    summarize(chlor = median(chlor, na.rm = T)) %>% # tinker with summary stat
+    summarize(chlor = median(chlorophyll, na.rm = T)) %>% # tinker with summary stat
     ggplot(aes(x = distance, y = fct_rev(depth_interval))) +
     facet_wrap(~ quarter, 
                # scales = "free_x",
