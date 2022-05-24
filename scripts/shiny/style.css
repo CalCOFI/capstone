@@ -1,8 +1,19 @@
 input[type="number"] {
   max-width: 80%;
 }
-
+/*Information Button*/
 #show {
+  /*display:block;*/
+  height: 35px;
+  width: 35px;
+  border-radius: 50%;
+  border: 3px solid black;
+  position: absolute;
+  bottom: 30px;
+  left: 10px;
+}
+
+#show2 {
   /*display:block;*/
   height: 35px;
   width: 35px;
@@ -56,6 +67,12 @@ h1, h2, h3, h4 { font-weight: 400; }
 
 /* Position and style citation */
 #cite {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  font-size: 12px;
+}
+#cite2 {
   position: absolute;
   bottom: 10px;
   left: 10px;
