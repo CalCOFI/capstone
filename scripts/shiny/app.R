@@ -12,13 +12,13 @@ source(fxns_r)
 load(bottle_rda)
 
 # UI ----
-#* Spatial tab ----
+
 ui <- navbarPage(
   "CalCOFI", id="nav",
   tabPanel(
     "Home",
-    h1("CalCOFI App"),
   ),
+  #* Spatial tab ----
   tabPanel(
     "Spatial Trends",
     div(
@@ -95,8 +95,9 @@ ui <- navbarPage(
         )),
       tags$div(
         id="cite",
-        'Data compiled for ', tags$em('CalCOFI'), ' by Us')),
-    actionButton("show", label = NULL, icon = icon("info"))
+        'Data compiled for ', tags$em('CalCOFI'), ' by Us'),
+      actionButton("show", label = NULL, icon = icon("info")),
+      ),
   ),
 #* temporal tab ----  
   tabPanel(
@@ -180,8 +181,12 @@ ui <- navbarPage(
               title = "Depth Average Plots",
               width = "100%",
               height = "100%",),),
-        )
+        ),
       ),
+      tags$div(
+        id="cite2",
+        'Data compiled for ', tags$em('CalCOFI'), ' by Us'),
+      actionButton("show2", label = NULL, icon = icon("info")),
     ),
   ),
 )
@@ -276,7 +281,7 @@ server <- function(input, output, session) {
       }
     }
   })
-  #---- Intro to CalCOFI modal
+  #*---- Intro to CalCOFI modal
   output[["image"]] <- renderImage({
     list(src = "ims/calcofi_header.png",
          alt = "This is alternate text",
@@ -287,13 +292,72 @@ server <- function(input, output, session) {
       title = "How to use this app",
       imageOutput("image", height = "100px"),
       HTML(
-      "This app is a data visualization tool that explores the following
-      properties of the seawater off the coast of California: dissolved oxygen concentration, temperature, salinity, and chlorophyll. <br>
-      The visualizations use data collected by the California Cooperative Fisheries and Oceanic Investigations (CalCOFI). 
-      Data is collected by collecting seawater at numerous discrete depths (between 0 - 500+ meters) at" ),
-      tags$a("sampling station", href = "https://calcofi.org/sampling-info/station-positions/"),
-      HTML("locations that are arranged along parallel station lines extending perpendicular off the coast. CalCOFI samples these stations 
-      quarterly in Winter, Spring, Summer, and Fall of each year and has been doing so for over 50 years."),
+      "The purpose of this page is to show the variation of the sampling patterns and parameters with space. 
+      On this tab are two plots, the Depth Profile Plots and the Transect Profile Plots.
+      <h4> Depth Profile Plots </h4>
+      These &quot;ponytail&quot; plots show the dissolved oxygen concentration by depth for the individual stations, 
+      shown as the &quot;strands&quot; of the &quot;ponytails&quot;. Most of the &quot;strands&quot; follow the 
+      same path of constant dissolved oxygen (DO) concentration at the surface before quickly declining in DO and 
+      decreasing with depth. We are particularly interested in the stations or &quot;strands&quot; that 
+      quickly decline in DO at shallower depths than other stations during seasons that should be experiencing higher
+      oxygen concentration, Summer and Fall, because this could indicate hypoxia. 
+      <h4> Transect Profile Plots </h4>
+      These profiles show the average value of dissolved oxygen concentration, salinity, temperature, or
+      chlorophyll concentration by depth and distance from shore for each transect line. Click on the desired
+      parameter in the inputs tab to see each parameter's plot. Chlorophyll is a good indicator of nutrient
+      levels in the ocean, so look out for high chlorophyll levels! <br>
+      When viewing the plots of average oxygen level, note that at deeper depths it is normal for these bottom
+      waters to have very little oxygen and low temperatures. We are interested in the graphs where the red and
+      black colors, indicating oxygen levels at and below the hypoxic threshold, invade shallower depths, especially
+      in the Summer and Fall when seasonal cycles allow for higher oxygen at the surface."),
+      easyClose = FALSE,
+    ),
+    )
+  })
+  #*---- Temporal Tab modal
+  output[["image2"]] <- renderImage({
+    list(src = "ims/calcofi_header.png",
+         alt = "This is alternate text",
+         width = "100%",
+         height = "75px")}, deleteFile = FALSE)
+  observeEvent(input$show2, {
+    showModal(modalDialog(
+      title = "The Temporal Tab",
+      imageOutput("image2", height = "100px"),
+      HTML(
+        "The purpose of this page is to show the variation of the sampling patterns and parameters with time. 
+        On this tab are two plots: the Time Series Plot and the Depth Average Plot. <br>
+      <h4> Time Series Plots </h4>
+      The time series plot shows you how a parameter (oxygen, temperature, salinity, chlorophyll)
+      changes over a given time range, at various depth ranges (0-50m, 50-100m, 200-500m). 
+      The output plot is the average value for all of the stations at a given time.
+        <br>
+        For the time series plot:
+        <ol>
+          <li>Select the date range input to select a time range you want to plot.</li>
+          <li>Select the depth ranges you want to plot.</li>
+          <li>Select the parameter of interest.</li>
+          <li>Refer to the legend to see that each point shape indicates what quarter that was sampled for.</li>
+          <li>Refer to the legend to see what depth range you are looking at.</li>
+        </ol>
+        <h4> Depth Average Plot </h4>
+        The depth average plot shows you how a parameter (oxygen, temperature, salinity, chlorophyll) 
+        changes over depth ranges, as well as the value of that parameter on a given date, 
+        and the minimum and maximum values over a date range. This data is for one station.
+        <br>
+        For the depth average plot:
+        <ol>
+          <li>Select the date range using the Date Range Input for the range you want to plot.</li>
+          <li>Click on a station <strong> on the map </strong> to update the station and line input.</li>
+          <li>Select the parameter of interest</li>
+          <li>Press play on the slider to animate the current value of the parameter on the plot.</li>
+        </ol>
+        This page also has the capability to animate through the station and line sampling over the date 
+        range selected. To do so simply:
+        <ol>
+          <li>Select a date range using the Date Range Input</li>
+          <li>Press play on the slider to show the sampling patterns over the years.</li>
+        </ol>"),
       #size = "l",
       easyClose = FALSE,
     ),
