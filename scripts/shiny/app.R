@@ -17,6 +17,7 @@ ui <- navbarPage(
   "CalCOFI", id="nav",
   tabPanel(
     "Home",
+    includeHTML("about.html")
   ),
   #* Spatial tab ----
   tabPanel(
