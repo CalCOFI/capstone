@@ -197,6 +197,8 @@ make_profile <- function(yr, lin){
 # add labels for nearshore to off shore on each side
 
 make_station_line <- function(yr, lin){
+  yr_input <- yr
+  line_input <- lin
   bottle %>%
     # filter to year, quarter, and station of interest
     filter(year == yr, 
@@ -224,12 +226,12 @@ make_station_line <- function(yr, lin){
                          high = '#059BFF',
                          mid = '#000000',
                          midpoint = log10(1.4),
-                         # limits = c(0.01, 6),
+                         limits = range(bottle$oxygen, na.rm = TRUE),
                          # values = rescale(c(-.01,1.4,6)),
                          na.value = "gray",
                          # space = "Lab", 
                          # guide = "colourbar",
-                         # n.breaks = 6, 
+                         n.breaks = 7, 
                          # oob_squish(range = c(0.01, 6)), default for oor values is NA
                          trans = 'log10'
                          ) +
@@ -239,7 +241,11 @@ make_station_line <- function(yr, lin){
                                      size = 8,
                                      vjust = 0.5),
           panel.grid = element_blank()) +
-    labs(x = 'Distance from shore (Nautical Miles)', y = 'Depth (m)',
+    labs(title = paste("Variation in Dissolved Oxygen for Line",
+                       line_input, "in", yr_input), 
+         caption = "Distance from shore is plotted along the x-axis with distance increasing from the 
+         right to the left as you move further West off the coast. Depth (binned) is plotted along the y-axis", 
+         x = 'Distance from shore (Nautical Miles)', y = 'Depth (m)',
          fill='Oxygen (mL O2/L seawater)') 
 }
 
@@ -249,6 +255,8 @@ make_station_line <- function(yr, lin){
 #Go light green to gree
 
 make_station_line_chlor <- function(yr, lin){
+  yr_input <- yr
+  line_input <- lin
   bottle %>%
     # filter to year, quarter, and station of interest
     filter(year == yr, 
@@ -266,13 +274,13 @@ make_station_line_chlor <- function(yr, lin){
     group_by(depth_interval,
              quarter,
              distance) %>%
-    summarize(chlorophyll = median(chlorophyll, na.rm = T)) %>% # tinker with summary stat
+    summarize(chlor = median(chlor, na.rm = T)) %>% # tinker with summary stat
     ggplot(aes(x = distance, y = fct_rev(depth_interval))) +
     facet_wrap(~ quarter, 
                # scales = "free_x",
                nrow = 4) +
     # using geom_tile instead of raster in order to create boxes of different widths
-    geom_tile(aes(fill = chlorophyll, width = distance)) +
+    geom_tile(aes(fill = chlor, width = distance)) +
     # adjust color scale
     scale_fill_gradient(low = '#E74C3C',
                         high = '#83C70C',
@@ -288,11 +296,17 @@ make_station_line_chlor <- function(yr, lin){
                                      size = 8,
                                      vjust = 0.5),
           panel.grid = element_blank()) +
-    labs(x = 'Distance from shore (Nautical Miles)', y = 'Depth (m)',
+    labs(title = paste("Variation in Chlorophyll for Line",
+                       line_input, "in", yr_input), 
+         caption = "Distance from shore is plotted along the x-axis with distance increasing from the 
+         right to the left as you move further West off the coast. Depth (binned) is plotted along the y-axis", 
+         x = 'Distance from shore (Nautical Miles)', y = 'Depth (m)',
          fill='Chlorophyll (micro grams/L seawater)') 
 }
 
 make_station_line_temp <- function(yr, lin){
+  yr_input <- yr
+  line_input <- lin
   bottle %>%
     # filter to year, quarter, and station of interest
     filter(year == yr, 
@@ -316,13 +330,14 @@ make_station_line_temp <- function(yr, lin){
     # using geom_tile instead of raster in order to create boxes of different widths
     geom_tile(aes(fill = temperature, width = distance)) +
     # adjust color scale
-    scale_fill_gradient(low = '#000000',
-                        high = '#059BFF',
-                        space = 'Lab',
-                        na.value = "gray",
-                        guide = "colourbar",
-                        aesthetics = "fill",
-                        trans = 'log10'
+    scale_fill_gradient(high = 'red2',
+                        # mid = 'yellow', # only used by scale_fill_gradient2
+                        low = 'blue4',
+                        # midpoint = median(bottle$temperature, na.rm = TRUE),
+                        # na.value = "gray",
+                        n.breaks = 8,
+                        trans = "log10",
+                        # limits = range(bottle$temperature, na.rm = TRUE)
     ) +
     # aesthetics
     theme_minimal() +
@@ -330,12 +345,17 @@ make_station_line_temp <- function(yr, lin){
                                      size = 8,
                                      vjust = 0.5),
           panel.grid = element_blank()) +
-    labs(x = 'Distance from shore (Nautical Miles)', y = 'Depth (m)',
+    labs(title = paste("Variation in Temperature for Line",
+                       line_input, "in", yr_input), 
+         subtitle = "Plotted by depth with respect to distance from shore", 
+         x = 'Distance from shore (Nautical Miles)', y = 'Depth (m)',
          fill='Temperature (˚C)') 
 }
 
 
 make_station_line_salinity <- function(yr, lin){
+  yr_input <- yr
+  line_input <- lin
   bottle %>%
     # filter to year, quarter, and station of interest
     filter(year == yr, 
@@ -359,8 +379,8 @@ make_station_line_salinity <- function(yr, lin){
     # using geom_tile instead of raster in order to create boxes of different widths
     geom_tile(aes(fill = salinity, width = distance)) +
     # adjust color scale
-    scale_fill_gradient(low = '#000000',
-                        high = '#08D1A2',
+    scale_fill_gradient(low = '#B00282',
+                        high = '#FFA1E6',
                         space = 'Lab',
                         na.value = "gray",
                         guide = "colourbar",
@@ -373,7 +393,12 @@ make_station_line_salinity <- function(yr, lin){
                                      size = 8,
                                      vjust = 0.5),
           panel.grid = element_blank()) +
-    labs(x = 'Distance from shore (Nautical Miles)', y = 'Depth (m)',
+    labs(title = paste("Variation in Salinity for Line",
+                       line_input, "in", yr_input), 
+         caption = "Distance from shore is plotted along the x-axis with distance increasing from the 
+         right to the left as you move further West off the coast. Depth (binned) is plotted along the y-axis",
+         x = 'Distance from shore (Nautical Miles)', 
+         y = 'Depth (m)',
          fill='Salinity (Practical Salinity Scale)') 
 }
 
@@ -390,7 +415,7 @@ make_basemap() %>%
   update_basemap(get_map_data(1984, 4))
 
 make_profile(2012, "093.3")
-make_station_line(2014, "093.3")
+make_station_line(2010, "093.3")
 make_station_line_chlor(2000, "093.3")
 #Do a green/cooler color for the cooler temp to red warm for temperature
 make_station_line_temp(2019, "080.0")
