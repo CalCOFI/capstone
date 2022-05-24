@@ -111,25 +111,91 @@ bottle_by_quarter <- bottle_by_year %>%
 
 years_with_all_qs <- na.omit(bottle_by_quarter)$year
 
+
+# Looking at minimum values for a specific near-shore station
 bottle %>%
-  filter(year == years_with_all_qs) %>%
-  group_by(year, quarter) %>%
-  summarize(oxygen = median(oxygen, na.rm = T)) %>%
-  ggplot(aes(x = year, y = oxygen)) +
+  filter(year == years_with_all_qs,
+         year >= 1985,
+         depth <= 150,
+         line == "093.3",
+         station == "028.0") %>%
+  group_by(year, quarter, station) %>%
+  summarize(oxygen = min(oxygen, na.rm = TRUE)) %>%
+  ggplot(aes(x = year, y = oxygen, color = quarter)) +
   geom_point() +
   geom_smooth(se = FALSE) +
-  labs(title = "Avergage Oxygen concentration recorded over all stations and depths", 
-       subtitle = "Using only years that have all quarters sampled", 
+  labs(title = "Minimum oxygen concentration for Station 093.3 028.0 above a depth of 150m", 
+       subtitle = "Using only years after 1985 that have all quarters sampled", 
        caption = "Quarter 1 is Winter, 2 is Spring, 3 is Summer, 4 is Fall")
 
-# Looking at line 77
-make_station_line(1972, "077.0")
-make_station_line(1986, "077.0")
 
-bottle_imdt <- bottle %>%
-  filter(line == "076.7",
-         station == "070.0",
-         depth == 50)
+# Looking at minimum value for all near-shore stations
+bottle %>%
+  filter(year == years_with_all_qs,
+         year >= 1985,
+         depth <= 150,
+         distance >= -50) %>%
+  group_by(year, quarter) %>%
+  summarize(oxygen = min(oxygen, na.rm = TRUE)) %>%
+  ggplot(aes(x = year, y = oxygen, color = quarter)) +
+  geom_point() +
+  geom_smooth(se = FALSE) +
+  labs(title = "Minimum oxygen for stations within 50m from shore above a depth of 150m", 
+       subtitle = "Using only years after 1985 that have all quarters sampled", 
+       caption = "Quarter 1 is Winter, 2 is Spring, 3 is Summer, 4 is Fall")
 
-lm(oxygen ~ date, data = bottle_imdt) %>%
-  summary()
+
+
+
+## GG Animate things
+
+lin <- "093.3"
+
+p <- bottle %>%
+  # filter to year, quarter, and station of interest
+  filter(line == lin) %>%
+  # bin depths into roughly even numbers of observations
+  mutate(depth_interval = cut_number(depth, 10)) %>%
+  # aggregate within depth bins
+  mutate(quarter = replace(quarter, quarter == 1, "Q1 - Winter"), 
+         quarter = replace(quarter, quarter == 2, "Q2 - Spring"), 
+         quarter = replace(quarter, quarter == 3, "Q3 - Summer"), 
+         quarter = replace(quarter, quarter == 4, "Q4 - Fall")) %>%
+  group_by(year,
+           depth_interval,
+           quarter,
+           distance) %>%
+  summarize(temperature = median(temperature, na.rm = T)) %>% # tinker with summary stat
+  ggplot(aes(x = distance, y = fct_rev(depth_interval))) +
+  facet_wrap(~ quarter, 
+             # scales = "free_x",
+             nrow = 4) +
+  # using geom_tile instead of raster in order to create boxes of different widths
+  geom_tile(aes(fill = temperature, width = distance)) +
+  # adjust color scale
+  scale_fill_gradient(high = 'red2',
+                      # mid = 'yellow', # only used by scale_fill_gradient2
+                      low = 'blue4',
+                      # midpoint = median(bottle$temperature, na.rm = TRUE),
+                      # na.value = "gray",
+                      n.breaks = 8,
+                      trans = "log10",
+                      # limits = range(bottle$temperature, na.rm = TRUE)
+  ) +
+  # aesthetics
+  theme_minimal() +
+  transition_time(year) +
+  theme(axis.text.x = element_text(angle = 90, 
+                                   size = 8,
+                                   vjust = 0.5),
+        panel.grid = element_blank()) +
+  labs(title = paste("Variation in Temperature for Line",
+                     lin, "in {frame_time}"), 
+       subtitle = "Plotted by depth with respect to distance from shore", 
+       x = 'Distance from shore (Nautical Miles)', y = 'Depth (m)',
+       fill='Temperature (˚C)') 
+  
+animate(p)
+  
+  
+  
