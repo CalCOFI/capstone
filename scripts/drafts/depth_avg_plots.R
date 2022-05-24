@@ -1,15 +1,8 @@
----
-title: "depth_avg_plots"
-author: "PK"
-date: "5/7/2022"
-output: html_document
----
-
-```{r setup, include=FALSE}
+## ----setup, include=FALSE---------------------------------------------------------------
 knitr::opts_chunk$set(echo = TRUE)
-```
 
-```{r echo = FALSE}
+
+## ----echo = FALSE-----------------------------------------------------------------------
 # library(plotly)
 library(lubridate)
 library(dplyr)
@@ -17,19 +10,18 @@ library(here)
 library(ggplot2)
 library(tidyverse)
 library(scales)
-```
 
-```{r}
+
+## ---------------------------------------------------------------------------------------
 bottle_rda <- here("data/processed/bottle.RData")
 load(bottle_rda)
-```
 
-```{r}
+
+## ---------------------------------------------------------------------------------------
 bottle
-```
 
 
-```{r echo=FALSE}
+## ----echo=FALSE-------------------------------------------------------------------------
 #Get the average oxygen for a given time period
 start_test <- as.Date("07-02-2000", "%m-%d-%Y")
 end_test <- as.Date("07-02-2010", "%m-%d-%Y")
@@ -43,9 +35,9 @@ get_date <- function(time){
          filter(date_max > ymd(time)) %>%
          slice_min(date_min)
 }
-```
 
-```{r}
+
+## ---------------------------------------------------------------------------------------
 data_test <- bottle %>%
   subset(start_test < date & end_test > date) %>%
   filter(depth <= 1000) %>%
@@ -56,10 +48,9 @@ data_test <- bottle %>%
   #Filter by station and date value
   filter(station == stationID_test & line == lineID_test) %>%
   filter(date == get_date(value_test)$date_min)
-```
 
 
-```{r echo=FALSE}
+## ----echo=FALSE-------------------------------------------------------------------------
 #Find all oxygen value in the date range at a specific line, station, depth chunks
 get_oxy <- function(start, end, value, stationID, lineID){
   bottle %>%
@@ -73,31 +64,26 @@ get_oxy <- function(start, end, value, stationID, lineID){
   filter(station == stationID & line == lineID) %>%
   filter(date == get_date(value)$date_min)
   }
-```
 
 
-
-```{r}
+## ---------------------------------------------------------------------------------------
 data <- get_oxy(start_test, end_test, value_test, lineID_test, stationID_test)
-```
 
 
-```{r}
+## ---------------------------------------------------------------------------------------
 data_test
-```
 
 
-
-```{r}
+## ---------------------------------------------------------------------------------------
 # custom transformation for depth profiles
 rev_sqrt <- trans_new('revsqrt', 
                       function(x) -sqrt(x),
                       function(x) x^2,
                       breaks = breaks_log(n = 5, base = 10))
 
-```
 
-```{r}
+
+## ---------------------------------------------------------------------------------------
 ggplot(data_test, aes(x=max_oxy, y=depth_interval)) + geom_point(size = 2) + 
   scale_y_discrete(limits = rev) +
   #scale_x_discrete(position = 'top')+
@@ -107,6 +93,4 @@ ggplot(data_test, aes(x=max_oxy, y=depth_interval)) + geom_point(size = 2) +
                                      size = 8, 
                                      vjust = 0.5),
           axis.text.y = element_text(size = 8))
-```
-
 
