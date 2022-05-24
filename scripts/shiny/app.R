@@ -358,7 +358,6 @@ server <- function(input, output, session) {
           <li>Select a date range using the Date Range Input</li>
           <li>Press play on the slider to show the sampling patterns over the years.</li>
         </ol>"),
-      
       #size = "l",
       easyClose = FALSE,
     ),
