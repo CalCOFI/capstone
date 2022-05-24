@@ -160,19 +160,20 @@ update_basemap <- function(basemap, filtered_data, kriging_data){
                    color = "black", 
                    opacity = 0.3,
                    weight = 1.5) %>%
+      # TG UPDATE HERE
+      addPolygons(data = kriging_data,
+                  fillColor = ~ raster_color_fn(pred),
+                  stroke = F,
+                  fillOpacity = 0.5,
+                  smoothFactor = 0.1,
+                  group = "kriging") %>%
       addCircleMarkers(data = points_df, 
                        popup = ~ label, 
                        color = ~ point_color_fn(sampled_ix),
                        radius = ~ if_else(sampled_ix, 4, 1.5),
                        stroke = F,
                        fillOpacity = 0.5, 
-                       layerId = ~sta_id) %>%
-      # TG UPDATE HERE
-      addPolygons(data = kriging_data,
-                  fillColor = ~ raster_color_fn(pred),
-                  stroke = F,
-                  fillOpacity = 0.5,
-                  smoothFactor = 0.1) 
+                       layerId = ~sta_id,)
   }
 
 }
