@@ -401,13 +401,14 @@ make_station_line_temp <- function(yr, lin){
     # using geom_tile instead of raster in order to create boxes of different widths
     geom_tile(aes(fill = temperature, width = distance)) +
     # adjust color scale
-    scale_fill_gradient(low = '#000000',
-                        high = '#059BFF',
-                        space = 'Lab',
-                        na.value = "gray",
-                        guide = "colourbar",
-                        aesthetics = "fill",
-                        trans = 'log10'
+    scale_fill_gradient(high = 'red2',
+                        # mid = 'yellow', # only used by scale_fill_gradient2
+                        low = 'blue4',
+                        # midpoint = median(bottle$temperature, na.rm = TRUE),
+                        # na.value = "gray",
+                        n.breaks = 8,
+                        trans = "log10",
+                        # limits = range(bottle$temperature, na.rm = TRUE)
     ) +
     # aesthetics
     theme_minimal() +
@@ -444,14 +445,14 @@ make_station_line_salinity <- function(yr, lin){
     # using geom_tile instead of raster in order to create boxes of different widths
     geom_tile(aes(fill = salinity, width = distance)) +
     # adjust color scale
-    scale_fill_gradient(low = '#000000',
-                        high = '#08D1A2',
+    scale_fill_gradient(low = '#B00282',
+                        high = '#FFA1E6',
                         space = 'Lab',
                         na.value = "gray",
                         guide = "colourbar",
                         aesthetics = "fill",
                         trans = 'log10'
-    ) +
+    )+
     # aesthetics
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 90, 
