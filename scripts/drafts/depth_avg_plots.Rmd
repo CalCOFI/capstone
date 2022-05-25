@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r echo = FALSE}
-library(plotly)
+# library(plotly)
 library(lubridate)
 library(dplyr)
 library(here)

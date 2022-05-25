@@ -17,6 +17,7 @@ ui <- navbarPage(
   "CalCOFI", id="nav",
   tabPanel(
     "Home",
+    includeHTML("about.html")
   ),
   #* Spatial tab ----
   tabPanel(
@@ -51,6 +52,10 @@ ui <- navbarPage(
           step = 1,
           value = 1),
         selectInput(
+          'dpth',
+          'Depth layer',
+          depths),
+        selectInput(
           'lin',
           'Transect (Line ID)',
           lines,),
@@ -66,6 +71,9 @@ ui <- navbarPage(
                        "Salinity" = "sal",
                        "Chlorophyll" = "chlorophyll"),
                      selected = "oxy",),
+        checkboxInput('show_krig',
+                      "Show Smooth Data", 
+                      value = TRUE),
       ),
       
       column(
@@ -198,6 +206,12 @@ server <- function(input, output, session) {
   # user retrieve data by year
   map_data <- reactive({get_map_data(input$yr, input$qr)})
   map_data2 <- reactive({get_map_data(input$yr2, input$qr2)})
+  kriging_data <- reactive({
+    if(input$show_krig == TRUE){
+      get_kriging_data(input$yr, input$qr, input$dpth)}
+    else{
+      NULL}
+  })
   
   # base map layer (will show default year 2000)
   output$map1 <- renderLeaflet({make_basemap()})
@@ -207,11 +221,10 @@ server <- function(input, output, session) {
   # plot user's selection
   observe({
     input$nav
-    
     tab1 <- leafletProxy('map1') %>%
-      update_basemap(map_data())
+      update_basemap(map_data(), kriging_data())
     tab2 <- leafletProxy('map2') %>%
-      update_basemap(map_data2())
+      update_basemap(map_data2(), NULL)
   })
   
   # * map1_marker_click ----
@@ -366,36 +379,25 @@ server <- function(input, output, session) {
   # downloadHandler contains 2 arguments as functions, namely filename, content
   output$sta_down <- downloadHandler(
     filename =  function() {
-      paste("station-line", input$yr, input$qr, input$sta, input$lin, sep="_")
+      paste("station-line", input$yr, input$qr, input$sta, input$lin, ".png", sep="_")
     },
     # content is a function with argument file. content writes the plot to the device
+    contentType = 'image/png',
     content = function(file) {
     png(file) # open the png device
-      if(input$param == "oxy"){
-        make_station_line(input$yr, input$lin)
-      }else{
-        if(input$param == "temp"){
-          make_station_line_temp(input$yr, input$lin)
-        }else{
-          if(input$param == "sal"){
-            make_station_line_salinity(input$yr, input$lin)
-          }
-          else{
-            make_station_line_chlor(input$yr, input$lin)
-          }
-        }
-      }
+      station_line_plot
     dev.off()  # turn the device off
       
     })
   output$prof_down <- downloadHandler(
     filename =  function() {
-      paste("profile-plot", input$yr, input$qr, input$sta, input$lin, sep="_")
+      paste("profile-plot", input$yr, input$qr, input$sta, input$lin, ".png", sep="_")
     },
-    # content is a function with argument file. content writes the plot to the device
+    # content is a function with argument file. content writes the plot to the 
+    contentType = 'image/png',
     content = function(file){
       png(file) # open the png device
-      make_profile(input$yr, input$lin)
+      profile_plot
       dev.off()  # turn the device off
       
     })
