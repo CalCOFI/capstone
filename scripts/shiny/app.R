@@ -52,6 +52,10 @@ ui <- navbarPage(
           step = 1,
           value = 1),
         selectInput(
+          'dpth',
+          'Depth layer',
+          depths),
+        selectInput(
           'lin',
           'Transect (Line ID)',
           lines,),
