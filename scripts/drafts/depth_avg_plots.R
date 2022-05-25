@@ -165,6 +165,9 @@ ggplot(data = range_summary,
   labs(x = 'median oxygen',
        y = 'depth (m)')
 
+ggsave('results/depthavg_opt1.png',
+       width = 5, height = 4, units = 'in', dpi = 300)
+
 # option 2: drop quarter from grouping
 range_summary <- bottle %>%
   filter(depth <= 1000,
@@ -196,6 +199,10 @@ ggplot(data = ungroup(range_summary),
   labs(x = 'median oxygen',
        y = 'depth (m)')
 
+ggsave('results/depthavg_opt2.png',
+       width = 4, height = 4, units = 'in', dpi = 300)
+
+
 # option 3: fit a loess with std errors
 
 timepoint_raw <- bottle %>%
@@ -226,3 +233,6 @@ bottle %>%
   geom_path(data = timepoint_raw,
             color = 'red',
             alpha = 0.5)
+
+ggsave('results/depthavg_opt3.png',
+       width = 4, height = 4, units = 'in', dpi = 300)
