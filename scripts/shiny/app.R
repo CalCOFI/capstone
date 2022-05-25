@@ -367,36 +367,25 @@ server <- function(input, output, session) {
   # downloadHandler contains 2 arguments as functions, namely filename, content
   output$sta_down <- downloadHandler(
     filename =  function() {
-      paste("station-line", input$yr, input$qr, input$sta, input$lin, sep="_")
+      paste("station-line", input$yr, input$qr, input$sta, input$lin, ".png", sep="_")
     },
     # content is a function with argument file. content writes the plot to the device
+    contentType = 'image/png',
     content = function(file) {
     png(file) # open the png device
-      if(input$param == "oxy"){
-        make_station_line(input$yr, input$lin)
-      }else{
-        if(input$param == "temp"){
-          make_station_line_temp(input$yr, input$lin)
-        }else{
-          if(input$param == "sal"){
-            make_station_line_salinity(input$yr, input$lin)
-          }
-          else{
-            make_station_line_chlor(input$yr, input$lin)
-          }
-        }
-      }
+      station_line_plot
     dev.off()  # turn the device off
       
     })
   output$prof_down <- downloadHandler(
     filename =  function() {
-      paste("profile-plot", input$yr, input$qr, input$sta, input$lin, sep="_")
+      paste("profile-plot", input$yr, input$qr, input$sta, input$lin, ".png", sep="_")
     },
-    # content is a function with argument file. content writes the plot to the device
+    # content is a function with argument file. content writes the plot to the 
+    contentType = 'image/png',
     content = function(file){
       png(file) # open the png device
-      make_profile(input$yr, input$lin)
+      profile_plot
       dev.off()  # turn the device off
       
     })
