@@ -13,7 +13,7 @@ library(rgdal)
 # grab data from a year/quarter and process for kriging
 
 load("data/processed/bottle.RData")
-yr <- 2005
+yr <- 2010
 qr <- 1
 
 kdata_sf <- bottle %>% 
@@ -60,7 +60,7 @@ plot(pred_grid)
 
 # fit variogram model & krige for one layer
 
-lyr <- 1
+lyr <- 3
 
 kdata_sf_layer <- kdata_sf %>% 
   filter(depth_layer == levels(depth_layer)[lyr])
@@ -86,7 +86,24 @@ plot(preds_sf)
 # plot
 #replaced with the kriging data 
 
-pal_fn <- colorNumeric(palette = c("#E74C3C", "#000000", "#059BFF"), NULL, n = 5) # try other colorX(...) leaflet functions
+### code for fixing color palette
+
+# vector with red to black colors
+hypoxic <- colorRampPalette(colors = c("#E74C3C", "#000000"), space = "Lab")(14)
+
+# vector of colors for black to blue (180 colors)
+not_hypoxic <- colorRampPalette(colors = c("#000000", "#059BFF"), space = "Lab")(51)
+
+## Combine the two color palettes
+rampcols <- c(hypoxic, not_hypoxic)
+
+mypal <- colorNumeric(palette = rampcols, domain =c(0,6.5))
+
+## If you want to preview the color range, run the following code
+#previewColors(colorNumeric(palette = rampcols, domain = NULL), values = -20:180)
+###
+
+#pal_fn <- colorNumeric(palette = c("#E74C3C", "#000000", "#059BFF"), domain = c(0,6))  # NULL, n = 5, domain = c(0,6)) # try other colorX(...) leaflet functions
 
 preds_sf %>%
   st_transform(4326) %>%
@@ -95,11 +112,11 @@ preds_sf %>%
           lat = 33.94975, 
           zoom = 5) %>%
   addProviderTiles(providers$Esri.OceanBasemap) %>%
-  addPolygons(fillColor = ~pal_fn(pred),
+  addPolygons(fillColor = ~mypal(pred),
               stroke = F,
               fillOpacity = 0.8,
               smoothFactor = 0.1)  %>%
-  addLegend("topright", pal = pal_fn, values = ~pred,
+  addLegend("topright", pal = mypal, values = ~pred,
            title = "Dissolved Oxygen Concentration",
            opacity = 1
   )
