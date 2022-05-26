@@ -281,7 +281,7 @@ server <- function(input, output, session) {
   
   
   
-  station_line_plot <- reactive({
+  station_line_plot <- function(){
     if(input$param == "oxy"){
       make_station_line(input$yr, input$lin)
     }else{
@@ -296,7 +296,8 @@ server <- function(input, output, session) {
         }
       }
     }
-  })
+  }
+  
   #*---- Intro to CalCOFI modal
   output[["image"]] <- renderImage({
     list(src = "ims/calcofi_header.png",
@@ -388,7 +389,7 @@ server <- function(input, output, session) {
     contentType = 'image/png',
     content = function(file) {
     png(file) # open the png device
-      station_line_plot
+      station_line_plot()
     dev.off()  # turn the device off
       
     })
@@ -400,7 +401,7 @@ server <- function(input, output, session) {
     contentType = 'image/png',
     content = function(file){
       png(file) # open the png device
-      profile_plot
+      profile_plot()
       dev.off()  # turn the device off
       
     })
