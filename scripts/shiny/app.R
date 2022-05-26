@@ -187,8 +187,9 @@ ui <- navbarPage(
             ),
             tabPanel(
               title = "Depth Average Plots",
+              plotOutput('depthavg', width = "100%", height = "800px",),
               width = "100%",
-              height = "100%",),),
+              height = "200%",),),
         ),
       ),
       tags$div(
@@ -277,6 +278,8 @@ server <- function(input, output, session) {
   profile_plot <- reactive({
     make_profile(input$yr, input$lin)
   })
+  
+  
   
   station_line_plot <- reactive({
     if(input$param == "oxy"){
@@ -401,10 +404,15 @@ server <- function(input, output, session) {
       dev.off()  # turn the device off
       
     })
-  
+  depth_av_plot <- reactive({
+    range_select <- input$animation
+    depth_avg_plot(as.Date(range_select[1], "%Y-%m-%d"), as.Date(range_select[2], "%Y-%m-%d"), 
+                   input$times, input$sta2, input$lin2)
+  })
   # plot depth profiles
   output$profile <- renderPlot({profile_plot()})
   output$stationline <- renderPlot({station_line_plot()})
+  output$depthavg <- renderPlot({depth_av_plot()})
   
 } 
 

@@ -125,72 +125,72 @@ depth_avg_plot <- function(start_input, end_input, date_input, station_input, li
       group_by(line, station) %>%
       summarize(max_depth = max(depth), .groups = 'drop') %>%
       filter(max_depth > 100)
-    
     if(station_input %in% possible_stations$station & line_input %in% possible_stations$line){
-        
-        # summary stats for full date range
-        range_summary <- bottle %>%
-          filter(depth <= 1000,
-                 date > start_input,
-                 date < end_input,
-                 line == line_input,
-                 station == station_input) %>%
-          mutate(depth_layer = cut_number(depth, 10)) %>%
-          group_by(depth_layer, quarter) %>%
-          summarize(across(.cols = c(oxygen, salinity, temperature, chlorophyll),
-                           .fns = list(min = ~ min(.x, na.rm = T), 
-                                       max = ~ max(.x, na.rm = T),
-                                       med = ~ median(.x, na.rm = T))),
-                    n = n(),
-                    .groups = 'drop')
-        
-        # summary stats for nearest date to given date
-        timepoint_summary <- bottle %>%
-          filter(depth <= 1000,
-                 line == line_input,
-                 station == station_input) %>%
-          mutate(diff = date - date_input) %>%
-          filter(diff == min(abs(diff))) %>% # oddly, faster than slice_min
-          mutate(depth_layer = cut_number(depth, 10)) %>%
-          group_by(depth_layer) %>%
-          summarize(across(.cols = c(oxygen, salinity, chlorophyll, temperature),
-                           .fns = c(min = ~ min(.x, na.rm = T),
-                                    max = ~ max(.x, na.rm = T),
-                                    med = ~ median(.x, na.rm = T))),
-                    n = n(),
-                    quarter = unique(quarter))
-        
-        
-        # option 2: drop quarter from grouping
-        range_summary <- bottle %>%
-          filter(depth <= 1000,
-                 date > start_test,
-                 date < end_test,
-                 line == line_input,
-                 station == station_input) %>%
-          mutate(depth_layer = cut_number(depth, 10)) %>%
-          group_by(depth_layer) %>%
-          summarize(across(.cols = c(oxygen, salinity, temperature, chlorophyll),
-                           .fns = list(min = ~ min(.x, na.rm = T), 
-                                       max = ~ max(.x, na.rm = T),
-                                       med = ~ median(.x, na.rm = T))),
-                    n = n(),
-                    .groups = 'drop')
-        
-        # plot
-        ggplot(data = ungroup(range_summary), 
-               aes(y = fct_rev(depth_layer))) +
-          geom_path(aes(x = oxygen_med,
-                        group = 1)) +
-          geom_errorbarh(aes(xmin = oxygen_min,
-                             xmax = oxygen_max),
-                         height = 0.5) +
-          geom_point(aes(x = oxygen_med),
-                     data = timepoint_summary,
-                     color = 'red') +
-          scale_x_log10() +
-          labs(x = 'median oxygen',
-               y = 'depth (m)')
+      # summary stats for full date range
+      range_summary <- bottle %>%
+        filter(depth <= 1000,
+               date > start_input,
+               date < end_input,
+               line == line_input,
+               station == station_input) %>%
+        mutate(depth_layer = cut_width(depth, 50)) %>%
+        group_by(depth_layer, quarter) %>%
+        summarize(across(.cols = c(oxygen, salinity, temperature, chlorophyll),
+                         .fns = list(min = ~ min(.x, na.rm = T), 
+                                     max = ~ max(.x, na.rm = T),
+                                     med = ~ median(.x, na.rm = T))),
+                  n = n(),
+                  .groups = 'drop')
+      # summary stats for nearest date to given date
+      timepoint_summary <- bottle %>%
+        filter(depth <= 1000,
+               line == line_input,
+               station == station_input) %>%
+        mutate(diff = date - date_input) %>%
+        filter(diff == min(abs(diff))) %>% # oddly, faster than slice_min
+        mutate(depth_layer = cut_width(depth, 50)) %>%
+        group_by(depth_layer) %>%
+        summarize(across(.cols = c(oxygen, salinity, chlorophyll, temperature),
+                         .fns = c(min = ~ min(.x, na.rm = T),
+                                  max = ~ max(.x, na.rm = T),
+                                  med = ~ median(.x, na.rm = T))),
+                  n = n(),
+                  quarter = unique(quarter))
+      
+      
+      ggsave('results/depthavg_opt1.png',
+             width = 5, height = 4, units = 'in', dpi = 300)
+      
+      # option 2: drop quarter from grouping
+      range_summary <- bottle %>%
+        filter(depth <= 1000,
+               date > start_input,
+               date < end_input,
+               line == line_input,
+               station == station_input) %>%
+        mutate(depth_layer = cut_width(depth, 50)) %>%
+        group_by(depth_layer) %>%
+        summarize(across(.cols = c(oxygen, salinity, temperature, chlorophyll),
+                         .fns = list(min = ~ min(.x, na.rm = T), 
+                                     max = ~ max(.x, na.rm = T),
+                                     med = ~ median(.x, na.rm = T))),
+                  n = n(),
+                  .groups = 'drop')
+      
+      # plot
+      ggplot(data = ungroup(range_summary), 
+             aes(y = fct_rev(depth_layer))) +
+        geom_path(aes(x = oxygen_med,
+                      group = 1)) +
+        geom_errorbarh(aes(xmin = oxygen_min,
+                           xmax = oxygen_max),
+                       height = 0.5) +
+        geom_point(aes(x = oxygen_med),
+                   data = timepoint_summary,
+                   color = 'red') +
+        scale_x_log10() +
+        labs(x = 'median oxygen',
+             y = 'depth (m)')
     }
     else{
       print("Looks like that station and line don't work! Try another one.")

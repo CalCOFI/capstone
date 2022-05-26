@@ -463,6 +463,93 @@ make_station_line_salinity <- function(yr, lin){
          fill='Salinity (Practical Salinity Scale)') 
 }
 
+get_nearest_date <- function(time){
+  bottle %>%
+    group_by(year, quarter) %>%
+    summarize(across(date, .fns = list(min = min, max = max)), .groups = "drop") %>%
+    filter(date_max > ymd(time)) %>%
+    slice_min(date_min) %>%
+    pull(quarter)
+}
+
+depth_avg_plot <- function(start_input, end_input, date_input, station_input, line_input){
+  # really can only do this for stations sampled below a certain depth
+  possible_stations <- bottle %>% 
+    filter(depth <= 1000,
+           date > start_input,
+           date < end_input) %>%
+    group_by(line, station) %>%
+    summarize(max_depth = max(depth), .groups = 'drop') %>%
+    filter(max_depth > 100)
+  if(station_input %in% possible_stations$station & line_input %in% possible_stations$line){
+    # summary stats for full date range
+    range_summary <- bottle %>%
+      filter(depth <= 1000,
+             date > start_input,
+             date < end_input,
+             line == line_input,
+             station == station_input) %>%
+      mutate(depth_layer = cut_width(depth, 50)) %>%
+      group_by(depth_layer, quarter) %>%
+      summarize(across(.cols = c(oxygen, salinity, temperature, chlorophyll),
+                       .fns = list(min = ~ min(.x, na.rm = T), 
+                                   max = ~ max(.x, na.rm = T),
+                                   med = ~ median(.x, na.rm = T))),
+                n = n(),
+                .groups = 'drop')
+    # summary stats for nearest date to given date
+    timepoint_summary <- bottle %>%
+      filter(depth <= 1000,
+             line == line_input,
+             station == station_input) %>%
+      mutate(diff = date - date_input) %>%
+      filter(diff == min(abs(diff))) %>% # oddly, faster than slice_min
+      mutate(depth_layer = cut_width(depth, 50)) %>%
+      group_by(depth_layer) %>%
+      summarize(across(.cols = c(oxygen, salinity, chlorophyll, temperature),
+                       .fns = c(min = ~ min(.x, na.rm = T),
+                                max = ~ max(.x, na.rm = T),
+                                med = ~ median(.x, na.rm = T))),
+                n = n(),
+                quarter = unique(quarter))
+    
+    
+    # drop quarter from grouping
+    range_summary <- bottle %>%
+      filter(depth <= 1000,
+             date > start_input,
+             date < end_input,
+             line == line_input,
+             station == station_input) %>%
+      mutate(depth_layer = cut_width(depth, 50)) %>%
+      group_by(depth_layer) %>%
+      summarize(across(.cols = c(oxygen, salinity, temperature, chlorophyll),
+                       .fns = list(min = ~ min(.x, na.rm = T), 
+                                   max = ~ max(.x, na.rm = T),
+                                   med = ~ median(.x, na.rm = T))),
+                n = n(),
+                .groups = 'drop')
+    
+    # plot
+    ggplot(data = ungroup(range_summary), 
+           aes(y = fct_rev(depth_layer))) +
+      geom_path(aes(x = oxygen_med,
+                    group = 1)) +
+      geom_errorbarh(aes(xmin = oxygen_min,
+                         xmax = oxygen_max),
+                     height = 0.5) +
+      geom_point(aes(x = oxygen_med),
+                 data = timepoint_summary,
+                 color = 'red') +
+      scale_x_log10() +
+      labs(x = 'median oxygen',
+           y = 'depth (m)')
+  }
+  else{
+    print("Looks like that station and line don't work! Try another one.")
+  }
+}
+
 
 save(
   list = ls(),
