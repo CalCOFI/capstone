@@ -13,8 +13,8 @@ library(rgdal)
 # grab data from a year/quarter and process for kriging
 
 load("data/processed/bottle.RData")
-yr <- 2000
-qr <- 3
+yr <- 2010
+qr <- 1
 
 kdata_sf <- bottle %>% 
   filter(year == yr, quarter == qr, depth < 500) %>%
@@ -60,7 +60,7 @@ plot(pred_grid)
 
 # fit variogram model & krige for one layer
 
-lyr <- 1
+lyr <- 3
 
 kdata_sf_layer <- kdata_sf %>% 
   filter(depth_layer == levels(depth_layer)[lyr])
@@ -78,30 +78,47 @@ preds_sf <- fit$krige_output %>%
 st_geometry(preds_sf) <- st_geometry(pred_grid)
 
 
-preds_sf_smooth <- smooth(preds_sf, method = "ksmooth", smoothness = 0.1)
+#preds_sf <- smooth(preds_sf, method = "ksmooth", smoothness = 0.1)
 
 
-plot(preds_sf_smooth)
+plot(preds_sf)
 
 # plot
+#replaced with the kriging data 
 
+### code for fixing color palette
 
-pal_fn <- colorQuantile(palette = c("red", "black", "blue"), NULL, n = 5) # try other colorX(...) leaflet functions
+# vector with red to black colors
+hypoxic <- colorRampPalette(colors = c("#E74C3C", "#000000"), space = "Lab")(14)
 
-preds_sf_smooth %>%
+# vector of colors for black to blue (180 colors)
+not_hypoxic <- colorRampPalette(colors = c("#000000", "#059BFF"), space = "Lab")(51)
+
+## Combine the two color palettes
+rampcols <- c(hypoxic, not_hypoxic)
+
+mypal <- colorNumeric(palette = rampcols, domain =c(0,6.5))
+
+## If you want to preview the color range, run the following code
+#previewColors(colorNumeric(palette = rampcols, domain = NULL), values = -20:180)
+###
+
+#pal_fn <- colorNumeric(palette = c("#E74C3C", "#000000", "#059BFF"), domain = c(0,6))  # NULL, n = 5, domain = c(0,6)) # try other colorX(...) leaflet functions
+
+preds_sf %>%
   st_transform(4326) %>%
   leaflet() %>% 
   setView(lng = -121.33940, 
           lat = 33.94975, 
           zoom = 5) %>%
   addProviderTiles(providers$Esri.OceanBasemap) %>%
-  addPolygons(fillColor = ~pal_fn(pred),
+  addPolygons(fillColor = ~mypal(pred),
               stroke = F,
               fillOpacity = 0.8,
               smoothFactor = 0.1)  %>%
-  addLegend("topright", colors = c("red", "black", "blue"), labels = c("low", "medium", "high"),
-            title = "Dissolved Oxygen Concentration",
-            opacity = 1
+  addLegend("topright", pal = mypal, values = ~pred,
+           title = "Dissolved Oxygen Concentration",
+           opacity = 1
   )
 
 ## comments
@@ -113,3 +130,15 @@ preds_sf_smooth %>%
 # match mallika's color palette? [X]
 
 # add legend []
+
+#<<<<<<< Updated upstream
+#make two sections one for smoothing another for plot in another script to interact
+#with loaded data and put 
+#=======
+#continuous color scale; try something other than quantiles to see DO values in 
+#use the actual number values 
+#>>>>>>> Stashed changes
+
+
+#make two sections one for smoothing another for plot in another script to interact
+#with loaded data and put 

@@ -4,18 +4,21 @@ if (!require("librarian")){
   library(librarian)
 }
 librarian::shelf(
-  glue, here, htmltools, leaflet, lubridate, sp, sf, tidyverse, dplyr)
+  glue, here, htmltools, leaflet, lubridate, sp, sf, tidyverse, scales)
 
 # paths ----
 bottle_rda <- here("data/processed/bottle.RData")
 save_rda   <- here("scripts/shiny/spatial-page/page_functions.RData")
+kriging_rda <- here('results/iterated-kriging-out.RData')
 
 # check paths
 stopifnot(file.exists(bottle_rda))
 stopifnot(dir.exists(dirname(save_rda)))
+stopifnot(file.exists(kriging_rda))
 
 # load data
 load(bottle_rda)
+load(kriging_rda)
 
 ## -----------------------------
 ## SPATIAL PAGE
@@ -62,7 +65,7 @@ get_map_data <- function(yr, qr){
     # merge station info (center lat and long)
     full_join(station_locations, by = c('line', 'station')) %>%
     # define indicator for whether a station was sampled
-    mutate(sampled_ix = is.na(maxdepth)) %>%
+    mutate(sampled_ix = !is.na(maxdepth)) %>%
     # create labels to display on hover
     mutate(label_line1 = paste('Line ID', line, sep = ' '),
            label_line2 = paste('Station ID', station, sep = ' '),
@@ -75,27 +78,68 @@ get_map_data <- function(yr, qr){
   return(out)
 }
 
+get_kriging_data <- function(yr, qr, dpth){
+  kriging_filtered <- kriging_out %>% 
+    filter(year == yr,
+           quarter == qr,
+           depth_layer == dpth) %>%
+    pull(preds)
+  
+  if(length(kriging_filtered) > 0){
+    ## TG UPDATE HERE?? smoothing takes too long
+    out <- kriging_filtered[[1]] %>%
+      st_transform(4326)
+  }else{
+    out <- NULL
+  }
+  
+  return(out)
+}
+
 # leaflet-specific
-point_color_fn <- colorFactor(c('#B73407', '#393939'), 
+point_color_fn <- colorFactor(c('#393939', '#393939'), 
                               c(T, F))
+raster_color_fn <- colorNumeric(palette = c("#E74C3C", "#000000", "#059BFF"),
+                                NULL, n = 5)
 
 lines <- bottle %>% pull(line) %>% unique()
 stations <- bottle %>% pull(station) %>% unique()
+depths <- kriging_out %>% pull(depth_layer) %>% unique()
 
 # generate base map layer
 make_basemap <- function(){
   leaflet() %>% 
-  setView(lng = -121.33940, 
-          lat = 33.94975, 
-          zoom = 5) %>%
-  addProviderTiles(providers$Esri.OceanBasemap)
+    setView(lng = -121.33940, 
+            lat = 33.94975, 
+            zoom = 5) %>%
+    addProviderTiles(providers$Esri.OceanBasemap)
 }
 
+# yr <- 2010
+# qr <- 1
+# dpth <- depths[1]
+# filtered_data <- get_map_data(yr, qr)
+# basemap <- make_basemap()
+# kriging_data <- get_kriging_data(yr, qr, dpth)
+
+### code for fixing color palette
+
+# vector with red to black colors
+hypoxic <- colorRampPalette(colors = c("#E74C3C", "#000000"), space = "Lab")(14)
+
+# vector of colors for black to blue (180 colors)
+not_hypoxic <- colorRampPalette(colors = c("#000000", "#059BFF"), space = "Lab")(51)
+
+## Combine the two color palettes
+rampcols <- c(hypoxic, not_hypoxic)
+
+mypal <- colorNumeric(palette = rampcols, domain =c(0,6.5))
 
 
-update_basemap <- function(basemap, filtered_data){
-
+update_basemap <- function(basemap, filtered_data, kriging_data){
+  
   list_data <- filtered_data %>%
+    arrange(line, station) %>%
     select(line, lon_ctr, lat_ctr) %>%
     distinct(lon_ctr, lat_ctr, line) %>%
     nest(data = c(lon_ctr, lat_ctr)) 
@@ -103,20 +147,64 @@ update_basemap <- function(basemap, filtered_data){
     pull(data) %>%
     lapply(function(df){st_linestring(as.matrix(df))}) %>%
     st_sfc()
-  #select_df <- lines_df %>% dplyr::select(line)
-  #sf_df <- st_sf(select_df, geo)
-  basemap %>%
-  clearMarkers() %>%
-    addPolylines(data = lines_df) %>%
-  addCircleMarkers(lat = ~lat_ctr, 
-                   lng = ~lon_ctr, 
-                   popup = ~label, 
-                   color = ~point_color_fn(sampled_ix),
-                  #once bottom_d added change radius = bottom depth/ or hypoxia 
-                   radius = ~ -log(loc_se),
-                   data = filtered_data,
-                   layerId = ~sta_id)
+  points_df <- filtered_data %>%
+    st_as_sf(coords = c('lon_ctr', 'lat_ctr')) %>%
+    st_set_crs(4326)
+  
+  if(is.null(kriging_data)){
+    basemap %>%
+      clearMarkers() %>% 
+      clearShapes()%>%
+      addPolylines(data = lines_df,
+                   color = "black", 
+                   opacity = 0.3,
+                   weight = 1.5) %>%
+      addCircleMarkers(data = points_df, 
+                       popup = ~label, 
+                       color = ~point_color_fn(sampled_ix),
+                       radius = ~ if_else(sampled_ix, 4, 1.5),
+                       stroke = F,
+                       fillOpacity = 0.5,
+                       layerId = ~sta_id)
+  }else{
+    basemap %>%
+      clearMarkers() %>% 
+      clearShapes()%>%
+      addPolylines(data = lines_df,
+                   color = "black", 
+                   opacity = 0.3,
+                   weight = 1.5)  %>%
+      addPolygons(data = kriging_data, 
+                  fillColor = ~mypal(kriging_data$preds),
+                  stroke = F,
+                  fillOpacity = 0.8,
+                  smoothFactor = 0.1)  %>%
+      #addLegend("topright", pal = ~mypal(preds), values = kriging_data$preds,
+               # title = "Dissolved Oxygen Concentration",
+                #opacity = 1) %>%
+      addPolygons(data = kriging_data,
+                  fillColor = ~ raster_color_fn(pred),
+                  stroke = F,
+                  fillOpacity = 0.5,
+                  smoothFactor = 0.1,
+                  group = "kriging") %>%
+      addCircleMarkers(data = points_df, 
+                       popup = ~ label, 
+                       color = ~ point_color_fn(sampled_ix),
+                       radius = ~ if_else(sampled_ix, 4, 1.5),
+                       stroke = F,
+                       fillOpacity = 0.5, 
+                       layerId = ~sta_id,)
+  }
+  
 }
+
+# yr <- 1995
+# qr <- 3
+# dpth <- depths[2]
+# make_basemap() %>%
+#   update_basemap(get_map_data(yr, qr),
+#                  get_kriging_data(yr, qr, dpth))
 
 # custom transformation for depth profiles
 rev_sqrt <- trans_new('revsqrt', 
@@ -194,8 +282,6 @@ make_profile <- function(yr, lin){
 # add labels for nearshore to off shore on each side
 
 make_station_line <- function(yr, lin){
-  yr_input <- yr
-  line_input <- lin
   bottle %>%
     # filter to year, quarter, and station of interest
     filter(year == yr, 
@@ -223,26 +309,22 @@ make_station_line <- function(yr, lin){
                          high = '#059BFF',
                          mid = '#000000',
                          midpoint = log10(1.4),
-                         limits = range(bottle$oxygen, na.rm = TRUE),
+                         # limits = c(0.01, 6),
                          # values = rescale(c(-.01,1.4,6)),
                          na.value = "gray",
                          # space = "Lab", 
                          # guide = "colourbar",
-                         n.breaks = 7, 
+                         # n.breaks = 6, 
                          # oob_squish(range = c(0.01, 6)), default for oor values is NA
                          trans = 'log10'
-                         ) +
+    ) +
     # aesthetics
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 90, 
                                      size = 8,
                                      vjust = 0.5),
           panel.grid = element_blank()) +
-    labs(title = paste("Variation in Dissolved Oxygen for Line",
-                       line_input, "in", yr_input), 
-         caption = "Distance from shore is plotted along the x-axis with distance increasing from the 
-         right to the left as you move further West off the coast. Depth (binned) is plotted along the y-axis", 
-         x = 'Distance from shore (Nautical Miles)', y = 'Depth (m)',
+    labs(x = 'Distance from shore (Nautical Miles)', y = 'Depth (m)',
          fill='Oxygen (mL O2/L seawater)') 
 }
 
@@ -252,15 +334,13 @@ make_station_line <- function(yr, lin){
 #Go light green to gree
 
 make_station_line_chlor <- function(yr, lin){
-  yr_input <- yr
-  line_input <- lin
   bottle %>%
     # filter to year, quarter, and station of interest
     filter(year == yr, 
            # quarter == qr,
            line == lin,
            depth <= 250,
-           chlor >= 0) %>%
+           chlorophyll >= 0) %>%
     # bin depths into roughly even numbers of observations
     mutate(depth_interval = cut_number(depth, 8)) %>%
     # aggregate within depth bins
@@ -271,13 +351,13 @@ make_station_line_chlor <- function(yr, lin){
     group_by(depth_interval,
              quarter,
              distance) %>%
-    summarize(chlor = median(chlor, na.rm = T)) %>% # tinker with summary stat
+    summarize(chlorophyll = median(chlorophyll, na.rm = T)) %>% # tinker with summary stat
     ggplot(aes(x = distance, y = fct_rev(depth_interval))) +
     facet_wrap(~ quarter, 
                # scales = "free_x",
                nrow = 4) +
     # using geom_tile instead of raster in order to create boxes of different widths
-    geom_tile(aes(fill = chlor, width = distance)) +
+    geom_tile(aes(fill = chlorophyll, width = distance)) +
     # adjust color scale
     scale_fill_gradient(low = '#E74C3C',
                         high = '#83C70C',
@@ -293,17 +373,11 @@ make_station_line_chlor <- function(yr, lin){
                                      size = 8,
                                      vjust = 0.5),
           panel.grid = element_blank()) +
-    labs(title = paste("Variation in Chlorophyll for Line",
-                       line_input, "in", yr_input), 
-         caption = "Distance from shore is plotted along the x-axis with distance increasing from the 
-         right to the left as you move further West off the coast. Depth (binned) is plotted along the y-axis", 
-         x = 'Distance from shore (Nautical Miles)', y = 'Depth (m)',
+    labs(x = 'Distance from shore (Nautical Miles)', y = 'Depth (m)',
          fill='Chlorophyll (micro grams/L seawater)') 
 }
 
 make_station_line_temp <- function(yr, lin){
-  yr_input <- yr
-  line_input <- lin
   bottle %>%
     # filter to year, quarter, and station of interest
     filter(year == yr, 
@@ -342,17 +416,12 @@ make_station_line_temp <- function(yr, lin){
                                      size = 8,
                                      vjust = 0.5),
           panel.grid = element_blank()) +
-    labs(title = paste("Variation in Temperature for Line",
-                       line_input, "in", yr_input), 
-         subtitle = "Plotted by depth with respect to distance from shore", 
-         x = 'Distance from shore (Nautical Miles)', y = 'Depth (m)',
+    labs(x = 'Distance from shore (Nautical Miles)', y = 'Depth (m)',
          fill='Temperature (˚C)') 
 }
 
 
 make_station_line_salinity <- function(yr, lin){
-  yr_input <- yr
-  line_input <- lin
   bottle %>%
     # filter to year, quarter, and station of interest
     filter(year == yr, 
@@ -383,20 +452,102 @@ make_station_line_salinity <- function(yr, lin){
                         guide = "colourbar",
                         aesthetics = "fill",
                         trans = 'log10'
-    ) +
+    )+
     # aesthetics
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 90, 
                                      size = 8,
                                      vjust = 0.5),
           panel.grid = element_blank()) +
-    labs(title = paste("Variation in Salinity for Line",
-                       line_input, "in", yr_input), 
-         caption = "Distance from shore is plotted along the x-axis with distance increasing from the 
-         right to the left as you move further West off the coast. Depth (binned) is plotted along the y-axis",
-         x = 'Distance from shore (Nautical Miles)', 
-         y = 'Depth (m)',
+    labs(x = 'Distance from shore (Nautical Miles)', y = 'Depth (m)',
          fill='Salinity (Practical Salinity Scale)') 
+}
+
+get_nearest_date <- function(time){
+  bottle %>%
+    group_by(year, quarter) %>%
+    summarize(across(date, .fns = list(min = min, max = max)), .groups = "drop") %>%
+    filter(date_max > ymd(time)) %>%
+    slice_min(date_min) %>%
+    pull(quarter)
+}
+
+depth_avg_plot <- function(start_input, end_input, date_input, station_input, line_input){
+  # really can only do this for stations sampled below a certain depth
+  possible_stations <- bottle %>% 
+    filter(depth <= 1000,
+           date > start_input,
+           date < end_input) %>%
+    group_by(line, station) %>%
+    summarize(max_depth = max(depth), .groups = 'drop') %>%
+    filter(max_depth > 100)
+  if(station_input %in% possible_stations$station & line_input %in% possible_stations$line){
+    # summary stats for full date range
+    range_summary <- bottle %>%
+      filter(depth <= 1000,
+             date > start_input,
+             date < end_input,
+             line == line_input,
+             station == station_input) %>%
+      mutate(depth_layer = cut_width(depth, 50)) %>%
+      group_by(depth_layer, quarter) %>%
+      summarize(across(.cols = c(oxygen, salinity, temperature, chlorophyll),
+                       .fns = list(min = ~ min(.x, na.rm = T), 
+                                   max = ~ max(.x, na.rm = T),
+                                   med = ~ median(.x, na.rm = T))),
+                n = n(),
+                .groups = 'drop')
+    # summary stats for nearest date to given date
+    timepoint_summary <- bottle %>%
+      filter(depth <= 1000,
+             line == line_input,
+             station == station_input) %>%
+      mutate(diff = date - date_input) %>%
+      filter(diff == min(abs(diff))) %>% # oddly, faster than slice_min
+      mutate(depth_layer = cut_width(depth, 50)) %>%
+      group_by(depth_layer) %>%
+      summarize(across(.cols = c(oxygen, salinity, chlorophyll, temperature),
+                       .fns = c(min = ~ min(.x, na.rm = T),
+                                max = ~ max(.x, na.rm = T),
+                                med = ~ median(.x, na.rm = T))),
+                n = n(),
+                quarter = unique(quarter))
+    
+    
+    # drop quarter from grouping
+    range_summary <- bottle %>%
+      filter(depth <= 1000,
+             date > start_input,
+             date < end_input,
+             line == line_input,
+             station == station_input) %>%
+      mutate(depth_layer = cut_width(depth, 50)) %>%
+      group_by(depth_layer) %>%
+      summarize(across(.cols = c(oxygen, salinity, temperature, chlorophyll),
+                       .fns = list(min = ~ min(.x, na.rm = T), 
+                                   max = ~ max(.x, na.rm = T),
+                                   med = ~ median(.x, na.rm = T))),
+                n = n(),
+                .groups = 'drop')
+    
+    # plot
+    ggplot(data = ungroup(range_summary), 
+           aes(y = fct_rev(depth_layer))) +
+      geom_path(aes(x = oxygen_med,
+                    group = 1)) +
+      geom_errorbarh(aes(xmin = oxygen_min,
+                         xmax = oxygen_max),
+                     height = 0.5) +
+      geom_point(aes(x = oxygen_med),
+                 data = timepoint_summary,
+                 color = 'red') +
+      scale_x_log10() +
+      labs(x = 'median oxygen',
+           y = 'depth (m)')
+  }
+  else{
+    print("Looks like that station and line don't work! Try another one.")
+  }
 }
 
 
@@ -408,13 +559,13 @@ save(
 ## ----------------------
 ## TESTS
 
-make_basemap() %>%
-  update_basemap(get_map_data(1984, 4))
-
-make_profile(2012, "093.3")
-make_station_line(2010, "093.3")
-make_station_line_chlor(2000, "093.3")
-#Do a green/cooler color for the cooler temp to red warm for temperature
-make_station_line_temp(2019, "080.0")
-# pink scale for pink salt
-make_station_line_salinity(2014, "093.3")
+# make_basemap() %>%
+#    update_basemap(get_map_data(1984, 4), get_kriging_data(1984,4,as.factor('[0,50)')))
+# 
+# make_profile(2012, "093.3")
+# make_station_line(2014, "093.3")
+# make_station_line_chlor(2000, "093.3")
+# #Do a green/cooler color for the cooler temp to red warm for temperature
+# make_station_line_temp(2019, "080.0")
+# # pink scale for pink salt
+# make_station_line_salinity(2014, "093.3")
