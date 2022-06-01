@@ -203,6 +203,8 @@ ui <- navbarPage(
 # SERVER ----
 server <- function(input, output, session) {
   
+  vals <- reactiveValues()
+  
   # map ----
   # user retrieve data by year
   map_data <- reactive({get_map_data(input$yr, input$qr)})
@@ -277,8 +279,8 @@ server <- function(input, output, session) {
   # user retrieve data by year/quarter
   profile_plot <- reactive({
     make_profile(input$yr, input$lin)
+    #vals$prof_plot <- prof_plot
   })
-  
   
   
   station_line_plot <- reactive({
@@ -296,6 +298,7 @@ server <- function(input, output, session) {
         }
       }
     }
+    #vals$st_plot <- st_plot
   })
   #*---- Intro to CalCOFI modal
   output[["image"]] <- renderImage({
@@ -388,7 +391,7 @@ server <- function(input, output, session) {
     contentType = 'image/png',
     content = function(file) {
     png(file) # open the png device
-      station_line_plot
+      print(vals$st_plot)
     dev.off()  # turn the device off
       
     })
@@ -397,10 +400,9 @@ server <- function(input, output, session) {
       paste("profile-plot", input$yr, input$qr, input$sta, input$lin, ".png", sep="_")
     },
     # content is a function with argument file. content writes the plot to the 
-    contentType = 'image/png',
     content = function(file){
       png(file) # open the png device
-      profile_plot
+      print(vals$prof_plot)
       dev.off()  # turn the device off
       
     })
