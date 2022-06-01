@@ -324,14 +324,15 @@ make_station_line <- function(yr, lin){
                                      size = 8,
                                      vjust = 0.5),
           panel.grid = element_blank()) +
-    labs(x = 'Distance from shore (Nautical Miles)', y = 'Depth (m)',
+    labs(title = paste("Variation in Dissolved Oxygen for Line",
+                       lin, "in", yr), 
+         caption = "Near shore on the right, off shore on the left.",
+         x = 'Distance from shore (Nautical Miles)', y = 'Depth (m)',
          fill='Oxygen (mL O2/L seawater)') 
 }
 
 
 
-# Editing function to take parameter of interest - first trying ChlorA
-#Go light green to gree
 
 make_station_line_chlor <- function(yr, lin){
   bottle %>%
@@ -373,7 +374,10 @@ make_station_line_chlor <- function(yr, lin){
                                      size = 8,
                                      vjust = 0.5),
           panel.grid = element_blank()) +
-    labs(x = 'Distance from shore (Nautical Miles)', y = 'Depth (m)',
+    labs(title = paste("Variation in Dissolved Oxygen for Line",
+                       lin, "in", yr), 
+         caption = "Near shore on the right, off shore on the left.",
+         x = 'Distance from shore (Nautical Miles)', y = 'Depth (m)',
          fill='Chlorophyll (micro grams/L seawater)') 
 }
 
@@ -416,7 +420,10 @@ make_station_line_temp <- function(yr, lin){
                                      size = 8,
                                      vjust = 0.5),
           panel.grid = element_blank()) +
-    labs(x = 'Distance from shore (Nautical Miles)', y = 'Depth (m)',
+    labs(title = paste("Variation in Dissolved Oxygen for Line",
+                       lin, "in", yr), 
+         caption = "Near shore on the right, off shore on the left.",
+         x = 'Distance from shore (Nautical Miles)', y = 'Depth (m)',
          fill='Temperature (˚C)') 
 }
 
@@ -459,7 +466,10 @@ make_station_line_salinity <- function(yr, lin){
                                      size = 8,
                                      vjust = 0.5),
           panel.grid = element_blank()) +
-    labs(x = 'Distance from shore (Nautical Miles)', y = 'Depth (m)',
+    labs(title = paste("Variation in Dissolved Oxygen for Line",
+                       lin, "in", yr), 
+         caption = "Near shore on the right, off shore on the left.",
+         x = 'Distance from shore (Nautical Miles)', y = 'Depth (m)',
          fill='Salinity (Practical Salinity Scale)') 
 }
 
