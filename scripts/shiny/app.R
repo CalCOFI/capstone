@@ -153,6 +153,11 @@ ui <- navbarPage(
           'Quarter',
           1:4,
           selected = 1),
+        selectInput(
+          'num_depths',
+          'Number of Depth cuts',
+          1:10,
+          selected = 5),
         numericInput(
           'yr2', # selection gets stored as `input$yr`
           'Year', 
@@ -180,6 +185,7 @@ ui <- navbarPage(
           tabsetPanel(
             tabPanel(
               title = 'Time Series Plots',
+              plotOutput('time_series', width = "100%", height = "800px"),
               width = "100%",
               height = "100%",
               status = 'primary',
@@ -411,10 +417,15 @@ server <- function(input, output, session) {
     depth_avg_plot(as.Date(range_select[1], "%Y-%m-%d"), as.Date(range_select[2], "%Y-%m-%d"), 
                    input$times, input$sta2, input$lin2)
   })
+  ts_plot <- reactive({
+    daterange <- input$animation
+    oxy_ts_plot(as.integer(input$num_depths), as.character(daterange[1]), as.character(daterange[2]))
+  })
   # plot depth profiles
   output$profile <- renderPlot({profile_plot()})
   output$stationline <- renderPlot({station_line_plot()})
   output$depthavg <- renderPlot({depth_av_plot()})
+  output$time_series <- renderPlot({ts_plot()})
   
 } 
 
