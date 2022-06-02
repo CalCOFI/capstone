@@ -173,6 +173,12 @@ ui <- navbarPage(
           'sta2',
           'Station ID',
           stations,),
+        radioButtons('param2', 
+                     'Parameters', 
+             choices = 
+               c("Oxygen" = "oxy2",
+                 "Temperature" = "temp2"),
+             selected = "oxy2",),
       ),
       column(
         4,
@@ -419,7 +425,12 @@ server <- function(input, output, session) {
   })
   ts_plot <- reactive({
     daterange <- input$animation
+    if(input$param2 == "oxy2"){
     oxy_ts_plot(as.integer(input$num_depths), as.character(daterange[1]), as.character(daterange[2]))
+    }
+    else{
+      temp_ts_plot(as.integer(input$num_depths), as.character(daterange[1]), as.character(daterange[2]))
+    }
   })
   # plot depth profiles
   output$profile <- renderPlot({profile_plot()})
