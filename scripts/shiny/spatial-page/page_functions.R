@@ -212,71 +212,133 @@ rev_sqrt <- trans_new('revsqrt',
                       function(x) x^2,
                       breaks = breaks_log(n = 5, base = 10))
 
-# depth profiles - Og function
-# make_profile <- function(yr, qr){
-#   bottle %>% 
-#     filter(year(date) == yr,
-#            quarter == qr) %>%
-#     select(oxygen, 
-#            salinity, 
-#            temperature, 
-#            depth, 
-#            cast) %>%
-#     pivot_longer(1:3, 
-#                  names_to = "measurement", 
-#                  values_to = "value") %>%
-#     ggplot(aes(x = value, y = depth,
-#                group = interaction(cast, measurement))) +
-#     geom_path(alpha = 0.1) +
-#     scale_y_continuous(trans = rev_sqrt) +
-#     facet_wrap(~ measurement,
-#                nrow = 1,
-#                scales = 'free_x') +
-#     geom_hline(yintercept = 0) +
-#     labs(x = '') +
-#     theme_minimal() +
-#     theme(axis.text.x = element_text(angle = 90, 
-#                                      size = 8, 
-#                                      vjust = 0.5),
-#           axis.text.y = element_text(size = 8))
-# }
-
-
-make_profile <- function(yr, lin){
-  stations_in_line <- bottle %>%
-    filter(year(date) == yr,
-           depth <= 1000,
-           line == lin) %>%
+# function with plots for all parameters
+make_profile <- function(yr, lin, param){
+  cleaned_bottle <- bottle %>% # Add labels for Quarters
     mutate(quarter = replace(quarter, quarter == 1, "Q1 - Winter"), 
            quarter = replace(quarter, quarter == 2, "Q2 - Spring"), 
            quarter = replace(quarter, quarter == 3, "Q3 - Summer"), 
-           quarter = replace(quarter, quarter == 4, "Q4 - Fall")) %>%
-    subset(line == lin)
-  bottle %>% 
+           quarter = replace(quarter, quarter == 4, "Q4 - Fall"))
+  
+  stations_in_line <- cleaned_bottle %>%
     filter(year(date) == yr,
-           depth <= 1000,
+           depth <= 500,
+           line == lin)
+  
+  oxygen_profile <- cleaned_bottle %>%
+    filter(year(date) == yr,
+           depth <= 500,
            line != lin) %>%
-    mutate(quarter = replace(quarter, quarter == 1, "Q1 - Winter"), 
-           quarter = replace(quarter, quarter == 2, "Q2 - Spring"), 
-           quarter = replace(quarter, quarter == 3, "Q3 - Summer"), 
-           quarter = replace(quarter, quarter == 4, "Q4 - Fall")) %>%
     ggplot(aes(x = oxygen, y = depth,
                group = interaction(cast, quarter))) +
     geom_path(color = "black", alpha = 0.1) +
     geom_path(data = stations_in_line,
-              color = "aquamarine4",
+              color = "turquoise4",
               size = 2,
               alpha = 0.1) +
     scale_y_continuous(trans = rev_sqrt) +
     facet_wrap(~ quarter,
                nrow = 1) +
     geom_hline(yintercept = 0) +
-    labs(x = 'Oxygen (ml of O_2/L of seawater)') +
+    labs(x = 'Oxygen (ml of O_2/L of seawater)',
+         y = 'Depth') +
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 90, 
                                      size = 8, 
                                      vjust = 0.5),
           axis.text.y = element_text(size = 8))
+  
+  temperature_profile <- cleaned_bottle %>%
+    filter(year(date) == yr,
+           depth <= 500,
+           line != lin) %>%
+    ggplot(aes(x = temperature, y = depth,
+               group = interaction(cast, quarter))) +
+    geom_path(color = "black", alpha = 0.1) +
+    geom_path(data = stations_in_line,
+              color = "blue3",
+              size = 2,
+              alpha = 0.1) +
+    scale_y_continuous(trans = rev_sqrt) +
+    facet_wrap(~ quarter,
+               nrow = 1) +
+    geom_hline(yintercept = 0) +
+    labs(x = 'Temperature (˚C)',
+         y = 'Depth') +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 90, 
+                                     size = 8, 
+                                     vjust = 0.5),
+          axis.text.y = element_text(size = 8))
+  
+  salinity_profile <- cleaned_bottle %>%
+    filter(year(date) == yr,
+           depth <= 500,
+           line != lin) %>%
+    ggplot(aes(x = salinity, y = depth,
+               group = interaction(cast, quarter))) +
+    geom_path(color = "black", alpha = 0.1) +
+    geom_path(data = stations_in_line,
+              color = "hotpink3",
+              size = 2,
+              alpha = 0.1) +
+    scale_y_continuous(trans = rev_sqrt) +
+    facet_wrap(~ quarter,
+               nrow = 1) +
+    geom_hline(yintercept = 0) +
+    labs(x = 'Salinity (Practical Salinity Scale)',
+         y = 'Depth') +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 90, 
+                                     size = 8, 
+                                     vjust = 0.5),
+          axis.text.y = element_text(size = 8))
+
+  chlorophyll_profile <- cleaned_bottle %>%
+    filter(year(date) == yr,
+           depth <= 275,
+           line != lin) %>%
+    ggplot(aes(x = chlorophyll, y = depth,
+               group = interaction(cast, quarter))) +
+    geom_path(color = "black", alpha = 0.1) +
+    geom_path(data = stations_in_line %>% subset(depth <= 275),
+              color = "springgreen4",
+              size = 2,
+              alpha = 0.1) +
+    scale_y_continuous(trans = rev_sqrt) +
+    facet_wrap(~ quarter,
+               nrow = 1) +
+    geom_hline(yintercept = 0) +
+    labs(x = 'Chlorophyll (micro grams/L seawater)',
+         y = 'Depth') +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 90, 
+                                     size = 8, 
+                                     vjust = 0.5),
+          axis.text.y = element_text(size = 8))
+  
+  if(param == "oxy"){
+    oxygen_profile +
+      labs(title =  paste("Depth profile for Oxygen Concentration for Line",
+                          lin, "in", yr))
+  }else{
+    if(param == "temp"){
+      temperature_profile +
+        labs(title =  paste("Depth profile for Temperature for Line",
+                            lin, "in", yr))
+    }else{
+      if(param == "sal"){
+        salinity_profile +
+          labs(title =  paste("Depth profile for Salinity for Line",
+                              lin, "in", yr))
+      }else{
+        chlorophyll_profile +
+          labs(title =  paste("Depth profile for Chrolophyll for Line",
+                              lin, "in", yr))
+      }
+    }
+  }
+
 }
 
 # add labels for nearshore to off shore on each side
@@ -374,7 +436,7 @@ make_station_line_chlor <- function(yr, lin){
                                      size = 8,
                                      vjust = 0.5),
           panel.grid = element_blank()) +
-    labs(title = paste("Variation in Dissolved Oxygen for Line",
+    labs(title = paste("Variation in Chlorophyll for Line",
                        lin, "in", yr), 
          caption = "Near shore on the right, off shore on the left.",
          x = 'Distance from shore (Nautical Miles)', y = 'Depth (m)',
@@ -420,7 +482,7 @@ make_station_line_temp <- function(yr, lin){
                                      size = 8,
                                      vjust = 0.5),
           panel.grid = element_blank()) +
-    labs(title = paste("Variation in Dissolved Oxygen for Line",
+    labs(title = paste("Variation in Temperature for Line",
                        lin, "in", yr), 
          caption = "Near shore on the right, off shore on the left.",
          x = 'Distance from shore (Nautical Miles)', y = 'Depth (m)',
@@ -466,7 +528,7 @@ make_station_line_salinity <- function(yr, lin){
                                      size = 8,
                                      vjust = 0.5),
           panel.grid = element_blank()) +
-    labs(title = paste("Variation in Dissolved Oxygen for Line",
+    labs(title = paste("Variation in Salinity for Line",
                        lin, "in", yr), 
          caption = "Near shore on the right, off shore on the left.",
          x = 'Distance from shore (Nautical Miles)', y = 'Depth (m)',
