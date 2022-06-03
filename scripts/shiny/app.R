@@ -290,7 +290,7 @@ server <- function(input, output, session) {
   ## PROFILE PANEL
   # user retrieve data by year/quarter
   profile_plot <- reactive({
-    make_profile(input$yr, input$lin)
+    make_profile(input$yr, input$lin, input$param)
     #vals$prof_plot <- prof_plot
   })
   
