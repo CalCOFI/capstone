@@ -72,7 +72,7 @@ ui <- navbarPage(
                        "Chlorophyll" = "chlorophyll"),
                      selected = "oxy",),
         checkboxInput('show_krig',
-                      "Show Smooth Data", 
+                      "Show Smooth (Oxygen) Data", 
                       value = TRUE),
       ),
       
@@ -155,8 +155,8 @@ ui <- navbarPage(
           selected = 1),
         selectInput(
           'num_depths',
-          'Number of Depth cuts',
-          1:10,
+          'Number of Depth Bins',
+          2:10,
           selected = 5),
         numericInput(
           'yr2', # selection gets stored as `input$yr`
@@ -359,7 +359,7 @@ server <- function(input, output, session) {
         "The purpose of this page is to show the variation of the sampling patterns and parameters with time. 
         On this tab are two plots: the Time Series Plot and the Depth Average Plot. <br>
       <h4> Time Series Plots </h4>
-      The time series plot shows you how a parameter (oxygen, temperature, salinity, chlorophyll)
+      The time series plot shows you how a parameter (oxygen, temperature)
       changes over a given time range, at various depth ranges (0-50m, 50-100m, 200-500m). 
       The output plot is the average value for all of the stations at a given time.
         <br>
@@ -372,7 +372,7 @@ server <- function(input, output, session) {
           <li>Refer to the legend to see what depth range you are looking at.</li>
         </ol>
         <h4> Depth Average Plot </h4>
-        The depth average plot shows you how a parameter (oxygen, temperature, salinity, chlorophyll) 
+        The depth average plot shows you how oxygen 
         changes over depth ranges, as well as the value of that parameter on a given date, 
         and the minimum and maximum values over a date range. This data is for one station.
         <br>

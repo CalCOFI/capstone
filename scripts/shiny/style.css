@@ -36,10 +36,16 @@ div.outer {
 
 
 #stationline{
-  height:90vh !important;
+  height:88vh !important;
 }
 #profile{
-  height:90vh !important;
+  height:88vh !important;
+}
+#time_series{
+  height:88vh !important;
+}
+#depthavg{
+  height:88vh !important;
 }
 
 /* Customize fonts */
