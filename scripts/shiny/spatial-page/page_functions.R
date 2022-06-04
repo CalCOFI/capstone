@@ -745,8 +745,6 @@ sal_ts_plot <- function(n_ranges, date_min, date_max){
     theme_bw() 
 }
 
-#oxy_ts_plot(1,'2000-01-15','2010-05-20')
-
 save(
   list = ls(),
   file = save_rda
@@ -761,6 +759,7 @@ save(
 # make_profile(2012, "093.3")
 # make_station_line(2014, "093.3")
 # make_station_line_chlor(2000, "093.3")
+# oxy_ts_plot(1,'2000-01-15','2010-05-20')
 # #Do a green/cooler color for the cooler temp to red warm for temperature
 # make_station_line_temp(2019, "080.0")
 # # pink scale for pink salt
