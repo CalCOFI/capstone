@@ -292,7 +292,7 @@ server <- function(input, output, session) {
     #vals$prof_plot <- prof_plot
   })
   
-  
+ 
   station_line_plot <- reactive({
     if(input$param == "oxy"){
       make_station_line(input$yr, input$lin)
