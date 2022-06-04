@@ -3,10 +3,10 @@ if (!require("librarian")){
   library(librarian)
 }
 librarian::shelf(
-  here, htmltools, leaflet, lubridate, scales, shiny, shinydashboard, sp, tidyverse)
+  here, htmltools, leaflet, lubridate, scales, shiny, shinydashboard, sp, tidyverse) #Make sure all packages required are installed
 
-fxns_r <- here("scripts/shiny/spatial-page/page_functions.R")
-bottle_rda <- here("data/processed/bottle.RData")
+fxns_r <- here("scripts/shiny/spatial-page/page_functions.R") #Loading in the script keeps app.R updated without having to run it separately
+bottle_rda <- here("data/processed/bottle.RData") #The binary file containing variables and functions required to run the app
 stopifnot(file.exists(fxns_r))
 source(fxns_r)
 load(bottle_rda)
@@ -26,8 +26,7 @@ ui <- navbarPage(
       class="outer",
       tags$head(
         # Include our custom CSS
-        includeCSS("style.css"),
-        includeScript("gomap.js"),),
+        includeCSS("style.css"),),
       # If not using custom CSS, set height of leafletOutput to a number instead of percent
       leafletOutput("map1", width="100%", height="100%"),
       
@@ -51,15 +50,15 @@ ui <- navbarPage(
           max = 4,
           step = 1,
           value = 1),
-        selectInput(
+        selectInput( #Used for kriging
           'dpth',
           'Depth layer',
           depths),
-        selectInput(
+        selectInput( #Used for updating the plots
           'lin',
           'Transect (Line ID)',
           lines,),
-        selectInput(
+        selectInput( #Used for updating the plots
           'sta',
           'Station ID',
           stations,),
@@ -75,7 +74,7 @@ ui <- navbarPage(
                       "Show Smooth (Oxygen) Data", 
                       value = TRUE),
       ),
-      
+      #Displaying plots
       column(
         4,
         absolutePanel(
@@ -85,6 +84,7 @@ ui <- navbarPage(
           width = 600, height = 10000, 
           h2('Profiles'),
           tabsetPanel(
+            #Depth profile plot
             tabPanel(
               title = 'Depth profiles',
               width = "100%",
@@ -92,6 +92,7 @@ ui <- navbarPage(
               status = 'primary',
               solidHeader = T,
               plotOutput("profile", width = "100%", height = "800px",)),
+            #Transect profile plot
             tabPanel(
               title = "Transect Profile",
               width = "100%",
@@ -101,7 +102,7 @@ ui <- navbarPage(
         )),
       tags$div(
         id="cite",
-        'Data compiled for ', tags$em('CalCOFI'), ' by Us'),
+        'Data compiled for ', tags$em('CalCOFI'), ' by CCDSP Fellows'),
       actionButton("show", label = NULL, icon = icon("info")),
       ),
   ),
@@ -121,7 +122,7 @@ ui <- navbarPage(
         width = 330, height = "auto",
         
         h2("Inputs"),
-        dateRangeInput(
+        dateRangeInput( #Used in time series plot, depth average plot, and updating slider for animation
           "animation",
           "Date Range",
           start = "1990-06-14",
@@ -136,7 +137,7 @@ ui <- navbarPage(
           width = NULL,
           autoclose = TRUE
         ),
-        sliderInput(
+        sliderInput( #Used only for map animation
           "times",
           "Press Play to Animate",
           min = as.Date(as.Date(min((bottle$date), na.rm = T), "%Y-%m-%d"), "%Y-%m-%d"),
@@ -146,28 +147,28 @@ ui <- navbarPage(
           step = 30,
           timeFormat = "%b %Y",
         ),
-        selectInput(
+        selectInput( #Used to update map
           'qr2',
           'Quarter',
           1:4,
           selected = 1),
-        selectInput(
-          'num_depths',
-          'Number of Depth Bins',
-          2:10,
-          selected = 5),
-        numericInput(
+        numericInput( #Used to update map
           'yr2', # selection gets stored as `input$yr`
           'Year', 
           min = min(year(bottle$date), na.rm = T),
           max = max(year(bottle$date), na.rm = T),
           value = 1992,
           step = 1),
-        selectInput(
+        selectInput( #Used for the time series plot
+          'num_depths',
+          'Number of Depth Bins',
+          2:10,
+          selected = 5),
+        selectInput( #Used to update depth_avg_plots
           'lin2',
           'Line ID',
           lines,),
-        selectInput(
+        selectInput( #Used to update depth_avg_plots
           'sta2',
           'Station ID',
           stations,),
@@ -175,10 +176,12 @@ ui <- navbarPage(
                      'Parameters', 
              choices = 
                c("Oxygen" = "oxy2",
-                 "Temperature" = "temp2"),
+                 "Temperature" = "temp2",
+                 "Salinity" = "sal2",
+                 "Chlorophyll" = "chlorophyll2"),
              selected = "oxy2",),
       ),
-      column(
+      column( #Display plots
         4,
         absolutePanel(
           id = "controls",class = "panel panel-default",
@@ -195,16 +198,17 @@ ui <- navbarPage(
               status = 'primary',
               solidHeader = T,
             ),
-            tabPanel(
-              title = "Depth Average Plots",
-              plotOutput('depthavg', width = "100%", height = "800px",),
-              width = "100%",
-              height = "200%",),),
+        #     tabPanel(
+        #       title = "Depth Average Plots",
+        #       plotOutput('depthavg', width = "100%", height = "800px",),
+        #       width = "100%",
+        #       height = "200%",),
+        ),
         ),
       ),
       tags$div(
         id="cite2",
-        'Data compiled for ', tags$em('CalCOFI'), ' by Us'),
+        'Data compiled for ', tags$em('CalCOFI'), ' by CCDSP Fellows'),
       actionButton("show2", label = NULL, icon = icon("info")),
     ),
   ),
@@ -213,10 +217,8 @@ ui <- navbarPage(
 # SERVER ----
 server <- function(input, output, session) {
   
-  vals <- reactiveValues()
-  
   # map ----
-  # user retrieve data by year
+  # user retrieve data by year to make the basemap and place the markers indicating station locations
   map_data <- reactive({get_map_data(input$yr, input$qr)})
   map_data2 <- reactive({get_map_data(input$yr2, input$qr2)})
   kriging_data <- reactive({
@@ -241,7 +243,7 @@ server <- function(input, output, session) {
   })
   
   # * map1_marker_click ----
-  # When marker is clicked, update Station ID selector
+  # When marker is clicked, update Station and Line ID selectors
   observe({
     event <- input$map1_marker_click
     if (is.null(event))
@@ -266,6 +268,8 @@ server <- function(input, output, session) {
       return()
     updateSelectInput(session, "lin2", selected=strsplit(event$id," ")[[1]][[1]])
   })
+  #For temporal tab inputs
+  #Date Range input updates endpoints of the slider inputs
   observe({
    val <- input$animation
    if (is.null(val))
@@ -274,6 +278,7 @@ server <- function(input, output, session) {
                      min = as.Date(val[1],"%Y-%m-%d"), max = as.Date(val[2], "%Y-%m-%d"), 
                      timeFormat = "%Y-%m-%d")
   })
+  #Slider updates the quarter and year values to update the map
   observe({
     quarter_val <- tibble(
       date = format(input$times, "%Y-%m-%d") %>% as.Date()) %>% 
@@ -286,13 +291,12 @@ server <- function(input, output, session) {
   })
   
   ## PROFILE PANEL
-  # user retrieve data by year/quarter
+  # user retrieve data by year/quarter and parameter for profile plots
   profile_plot <- reactive({
     make_profile(input$yr, input$lin, input$param)
-    #vals$prof_plot <- prof_plot
   })
   
- 
+ #Station line plots use if else to determine which plot to show based on which parameter
   station_line_plot <- reactive({
     if(input$param == "oxy"){
       make_station_line(input$yr, input$lin)
@@ -308,7 +312,6 @@ server <- function(input, output, session) {
         }
       }
     }
-    #vals$st_plot <- st_plot
   })
   #*---- Intro to CalCOFI modal
   output[["image"]] <- renderImage({
@@ -397,6 +400,9 @@ server <- function(input, output, session) {
     ),
     )
   })
+  
+  #Temporal tab plots
+  
   depth_av_plot <- reactive({
     range_select <- input$animation
     depth_avg_plot(as.Date(range_select[1], "%Y-%m-%d"), as.Date(range_select[2], "%Y-%m-%d"), 
@@ -408,10 +414,19 @@ server <- function(input, output, session) {
     oxy_ts_plot(as.integer(input$num_depths), as.character(daterange[1]), as.character(daterange[2]))
     }
     else{
-      temp_ts_plot(as.integer(input$num_depths), as.character(daterange[1]), as.character(daterange[2]))
+      if(input$param == "temp2"){
+        temp_ts_plot(input$yr, input$lin)
+      }else{
+        if(input$param == "sal2"){
+          sal_ts_plot(input$yr, input$lin)
+        }
+        else{
+          cho_ts_plot(input$yr, input$lin)
+        }
+      }
     }
   })
-  # plot depth profiles
+  # plot outputs
   output$profile <- renderPlot({profile_plot()})
   output$stationline <- renderPlot({station_line_plot()})
   output$depthavg <- renderPlot({depth_av_plot()})

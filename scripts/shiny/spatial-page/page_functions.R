@@ -4,12 +4,12 @@ if (!require("librarian")){
   library(librarian)
 }
 librarian::shelf(
-  glue, here, htmltools, leaflet, lubridate, sp, sf, tidyverse, scales)
+  glue, here, htmltools, leaflet, lubridate, sp, sf, tidyverse, scales) #Ensures that libraries required are installed
 
 # paths ----
-bottle_rda <- here("data/processed/bottle.RData")
+bottle_rda <- here("data/processed/bottle.RData") #Processed bottle data is stored in .RData for speed
 save_rda   <- here("scripts/shiny/spatial-page/page_functions.RData")
-kriging_rda <- here('results/iterated-kriging-out.RData')
+kriging_rda <- here('results/iterated-kriging-out.RData') #Data for smoothing
 
 # check paths
 stopifnot(file.exists(bottle_rda))
@@ -135,7 +135,7 @@ rampcols <- c(hypoxic, not_hypoxic)
 
 mypal <- colorNumeric(palette = rampcols, domain =c(0,6.5))
 
-
+#Read in inputs from app and update markers, lines, and polygons on the basemap
 update_basemap <- function(basemap, filtered_data, kriging_data){
   
   list_data <- filtered_data %>%
@@ -534,7 +534,7 @@ make_station_line_salinity <- function(yr, lin){
          x = 'Distance from shore (Nautical Miles)', y = 'Depth (m)',
          fill='Salinity (Practical Salinity Scale)') 
 }
-
+#Used in depth_avg_plot
 get_nearest_date <- function(time){
   bottle %>%
     group_by(year, quarter) %>%
@@ -543,7 +543,8 @@ get_nearest_date <- function(time){
     slice_min(date_min) %>%
     pull(quarter)
 }
-
+#Shows maximum and minimum (errorbars) for a given date range, and current value (red point) 
+#of oxygen at various depth bins at a given station and line
 depth_avg_plot <- function(start_input, end_input, date_input, station_input, line_input){
   # really can only do this for stations sampled below a certain depth
   possible_stations <- bottle %>% 
@@ -621,7 +622,7 @@ depth_avg_plot <- function(start_input, end_input, date_input, station_input, li
     print("Looks like that station and line don't work! Try another one.")
   }
 }
-
+#Time series plot for temperature
 temp_ts_plot <- function(n_ranges, date_min, date_max){
   if (n_ranges > 1){
     bottle <- bottle %>% 
@@ -651,7 +652,7 @@ temp_ts_plot <- function(n_ranges, date_min, date_max){
     scale_y_continuous(limits=c(NA,NA),expand = c(0.1, 0.1)) +
     theme_bw() 
 }
-
+#Time series plot for oxygen
 oxy_ts_plot <- function(n_ranges, date_min, date_max){
   if (n_ranges > 1){
     bottle <- bottle %>% 
@@ -673,7 +674,7 @@ oxy_ts_plot <- function(n_ranges, date_min, date_max){
     ggplot(aes(x=date, y=oxygen, group=depth_fac, color=depth_fac, shape=as.factor(quarter))) +
     geom_point(na.rm=T) +
     geom_line(linetype='dashed') +
-    labs(title = title = "Median Oxygen Across All Stations Over Time", x = "Date", y = "Oxygen (mL/L)", color = "Depth Range (m)", shape = "Quarter") +
+    labs(title = "Median Oxygen Across All Stations Over Time", x = "Date", y = "Oxygen (mL/L)", color = "Depth Range (m)", shape = "Quarter") +
     scale_shape_discrete(name="Quarter",
                          breaks=c("1", "2", "3","4"),
                          labels=c("Winter", "Spring", "Summer","Fall")) +
@@ -682,7 +683,7 @@ oxy_ts_plot <- function(n_ranges, date_min, date_max){
     theme_bw() 
   
 }
-
+#chlorophyll time series plot
 cho_ts_plot <- function(n_ranges, date_min, date_max){
   if (n_ranges > 1){
     bottle <- bottle %>% 
@@ -713,7 +714,7 @@ cho_ts_plot <- function(n_ranges, date_min, date_max){
     theme_bw() 
   
 }
-
+#salinity time series plot
 sal_ts_plot <- function(n_ranges, date_min, date_max){
   if (n_ranges > 1){
     bottle <- bottle %>% 
