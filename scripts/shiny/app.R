@@ -72,7 +72,7 @@ ui <- navbarPage(
                        "Chlorophyll" = "chlorophyll"),
                      selected = "oxy",),
         checkboxInput('show_krig',
-                      "Show Smooth Data", 
+                      "Show Smooth (Oxygen) Data", 
                       value = TRUE),
       ),
       
@@ -91,14 +91,12 @@ ui <- navbarPage(
               height = "100%",
               status = 'primary',
               solidHeader = T,
-              plotOutput("profile", width = "100%", height = "800px",),
-              downloadButton(outputId = "prof_down", label = "Download the plot")),
+              plotOutput("profile", width = "100%", height = "800px",)),
             tabPanel(
               title = "Transect Profile",
               width = "100%",
               height = "200%",
-              plotOutput('stationline', width = "100%", height = "800px",),
-              downloadButton(outputId = "sta_down", label = "Download the plot")),
+              plotOutput('stationline', width = "100%", height = "800px",)),
           ),
         )),
       tags$div(
@@ -153,6 +151,11 @@ ui <- navbarPage(
           'Quarter',
           1:4,
           selected = 1),
+        selectInput(
+          'num_depths',
+          'Number of Depth Bins',
+          2:10,
+          selected = 5),
         numericInput(
           'yr2', # selection gets stored as `input$yr`
           'Year', 
@@ -168,6 +171,12 @@ ui <- navbarPage(
           'sta2',
           'Station ID',
           stations,),
+        radioButtons('param2', 
+                     'Parameters', 
+             choices = 
+               c("Oxygen" = "oxy2",
+                 "Temperature" = "temp2"),
+             selected = "oxy2",),
       ),
       column(
         4,
@@ -180,6 +189,7 @@ ui <- navbarPage(
           tabsetPanel(
             tabPanel(
               title = 'Time Series Plots',
+              plotOutput('time_series', width = "100%", height = "800px"),
               width = "100%",
               height = "100%",
               status = 'primary',
@@ -202,6 +212,8 @@ ui <- navbarPage(
 
 # SERVER ----
 server <- function(input, output, session) {
+  
+  vals <- reactiveValues()
   
   # map ----
   # user retrieve data by year
@@ -276,12 +288,12 @@ server <- function(input, output, session) {
   ## PROFILE PANEL
   # user retrieve data by year/quarter
   profile_plot <- reactive({
-    make_profile(input$yr, input$lin)
+    make_profile(input$yr, input$lin, input$param)
+    #vals$prof_plot <- prof_plot
   })
   
-  
-  
-  station_line_plot <- function(){
+ 
+  station_line_plot <- reactive({
     if(input$param == "oxy"){
       make_station_line(input$yr, input$lin)
     }else{
@@ -296,8 +308,8 @@ server <- function(input, output, session) {
         }
       }
     }
-  }
-  
+    #vals$st_plot <- st_plot
+  })
   #*---- Intro to CalCOFI modal
   output[["image"]] <- renderImage({
     list(src = "ims/calcofi_header.png",
@@ -326,7 +338,12 @@ server <- function(input, output, session) {
       When viewing the plots of average oxygen level, note that at deeper depths it is normal for these bottom
       waters to have very little oxygen and low temperatures. We are interested in the graphs where the red and
       black colors, indicating oxygen levels at and below the hypoxic threshold, invade shallower depths, especially
-      in the Summer and Fall when seasonal cycles allow for higher oxygen at the surface."),
+      in the Summer and Fall when seasonal cycles allow for higher oxygen at the surface.
+      <h4>Spatial Interpolation </h4>
+      This plot shows continuous data created from discrete data for oxygen concentration by depth. There is a selectable
+      range of depths to view from 0-50, 50-100, 100-250, 250-500. The plot displays a light blue to black to red color gradient, 
+      with black and red indicating hypoxic zones. We are interested in the appearance of black and red colors at the surface during
+      Summer and Fall."),
       easyClose = FALSE,
     ),
     )
@@ -345,7 +362,7 @@ server <- function(input, output, session) {
         "The purpose of this page is to show the variation of the sampling patterns and parameters with time. 
         On this tab are two plots: the Time Series Plot and the Depth Average Plot. <br>
       <h4> Time Series Plots </h4>
-      The time series plot shows you how a parameter (oxygen, temperature, salinity, chlorophyll)
+      The time series plot shows you how a parameter (oxygen, temperature)
       changes over a given time range, at various depth ranges (0-50m, 50-100m, 200-500m). 
       The output plot is the average value for all of the stations at a given time.
         <br>
@@ -358,7 +375,7 @@ server <- function(input, output, session) {
           <li>Refer to the legend to see what depth range you are looking at.</li>
         </ol>
         <h4> Depth Average Plot </h4>
-        The depth average plot shows you how a parameter (oxygen, temperature, salinity, chlorophyll) 
+        The depth average plot shows you how oxygen 
         changes over depth ranges, as well as the value of that parameter on a given date, 
         and the minimum and maximum values over a date range. This data is for one station.
         <br>
@@ -380,40 +397,25 @@ server <- function(input, output, session) {
     ),
     )
   })
-  # downloadHandler contains 2 arguments as functions, namely filename, content
-  output$sta_down <- downloadHandler(
-    filename =  function() {
-      paste("station-line", input$yr, input$qr, input$sta, input$lin, ".png", sep="_")
-    },
-    # content is a function with argument file. content writes the plot to the device
-    contentType = 'image/png',
-    content = function(file) {
-    png(file) # open the png device
-      station_line_plot()
-    dev.off()  # turn the device off
-      
-    })
-  output$prof_down <- downloadHandler(
-    filename =  function() {
-      paste("profile-plot", input$yr, input$qr, input$sta, input$lin, ".png", sep="_")
-    },
-    # content is a function with argument file. content writes the plot to the 
-    contentType = 'image/png',
-    content = function(file){
-      png(file) # open the png device
-      profile_plot()
-      dev.off()  # turn the device off
-      
-    })
   depth_av_plot <- reactive({
     range_select <- input$animation
     depth_avg_plot(as.Date(range_select[1], "%Y-%m-%d"), as.Date(range_select[2], "%Y-%m-%d"), 
                    input$times, input$sta2, input$lin2)
   })
+  ts_plot <- reactive({
+    daterange <- input$animation
+    if(input$param2 == "oxy2"){
+    oxy_ts_plot(as.integer(input$num_depths), as.character(daterange[1]), as.character(daterange[2]))
+    }
+    else{
+      temp_ts_plot(as.integer(input$num_depths), as.character(daterange[1]), as.character(daterange[2]))
+    }
+  })
   # plot depth profiles
   output$profile <- renderPlot({profile_plot()})
   output$stationline <- renderPlot({station_line_plot()})
   output$depthavg <- renderPlot({depth_av_plot()})
+  output$time_series <- renderPlot({ts_plot()})
   
 } 
 
