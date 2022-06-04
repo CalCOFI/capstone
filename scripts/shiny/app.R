@@ -91,14 +91,12 @@ ui <- navbarPage(
               height = "100%",
               status = 'primary',
               solidHeader = T,
-              plotOutput("profile", width = "100%", height = "800px",),
-              downloadButton(outputId = "prof_down", label = "Download the plot")),
+              plotOutput("profile", width = "100%", height = "800px",)),
             tabPanel(
               title = "Transect Profile",
               width = "100%",
               height = "200%",
-              plotOutput('stationline', width = "100%", height = "800px",),
-              downloadButton(outputId = "sta_down", label = "Download the plot")),
+              plotOutput('stationline', width = "100%", height = "800px",)),
           ),
         )),
       tags$div(
@@ -399,30 +397,6 @@ server <- function(input, output, session) {
     ),
     )
   })
-  # downloadHandler contains 2 arguments as functions, namely filename, content
-  output$sta_down <- downloadHandler(
-    filename =  function() {
-      paste("station-line", input$yr, input$qr, input$sta, input$lin, ".png", sep="_")
-    },
-    # content is a function with argument file. content writes the plot to the device
-    contentType = 'image/png',
-    content = function(file) {
-    png(file) # open the png device
-      print(vals$st_plot)
-    dev.off()  # turn the device off
-      
-    })
-  output$prof_down <- downloadHandler(
-    filename =  function() {
-      paste("profile-plot", input$yr, input$qr, input$sta, input$lin, ".png", sep="_")
-    },
-    # content is a function with argument file. content writes the plot to the 
-    content = function(file){
-      png(file) # open the png device
-      print(vals$prof_plot)
-      dev.off()  # turn the device off
-      
-    })
   depth_av_plot <- reactive({
     range_select <- input$animation
     depth_avg_plot(as.Date(range_select[1], "%Y-%m-%d"), as.Date(range_select[2], "%Y-%m-%d"), 
