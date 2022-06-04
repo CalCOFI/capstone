@@ -340,7 +340,12 @@ server <- function(input, output, session) {
       When viewing the plots of average oxygen level, note that at deeper depths it is normal for these bottom
       waters to have very little oxygen and low temperatures. We are interested in the graphs where the red and
       black colors, indicating oxygen levels at and below the hypoxic threshold, invade shallower depths, especially
-      in the Summer and Fall when seasonal cycles allow for higher oxygen at the surface."),
+      in the Summer and Fall when seasonal cycles allow for higher oxygen at the surface.
+      <h4>Spatial Interpolation </h4>
+      This plot shows continuous data created from discrete data for oxygen concentration by depth. There is a selectable
+      range of depths to view from 0-50, 50-100, 100-250, 250-500. The plot displays a light blue to black to red color gradient, 
+      with black and red indicating hypoxic zones. We are interested in the appearance of black and red colors at the surface during
+      Summer and Fall."),
       easyClose = FALSE,
     ),
     )
