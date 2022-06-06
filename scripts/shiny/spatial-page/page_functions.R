@@ -207,10 +207,10 @@ update_basemap <- function(basemap, filtered_data, kriging_data){
 #                  get_kriging_data(yr, qr, dpth))
 
 # custom transformation for depth profiles
-rev_sqrt <- trans_new('revsqrt', 
-                      function(x) -sqrt(x),
-                      function(x) x^2,
-                      breaks = breaks_log(n = 5, base = 10))
+# rev_sqrt <- trans_new('revsqrt', 
+#                       function(x) -sqrt(x),
+#                       function(x) x^2,
+#                       breaks = breaks_log(n = 5, base = 10))
 
 # function with plots for all parameters
 make_profile <- function(yr, lin, param){
@@ -229,19 +229,18 @@ make_profile <- function(yr, lin, param){
     filter(year(date) == yr,
            depth <= 500,
            line != lin) %>%
-    ggplot(aes(x = oxygen, y = depth,
+    ggplot(aes(x = oxygen, y = -depth,
                group = interaction(cast, quarter))) +
     geom_path(color = "black", alpha = 0.1) +
     geom_path(data = stations_in_line,
               color = "turquoise4",
               size = 2,
               alpha = 0.1) +
-    scale_y_continuous(trans = rev_sqrt) +
     facet_wrap(~ quarter,
                nrow = 1) +
     geom_hline(yintercept = 0) +
     labs(x = 'Oxygen (ml of O_2/L of seawater)',
-         y = 'Depth') +
+         y = 'Depth (m)') +
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 90, 
                                      size = 8, 
@@ -252,19 +251,18 @@ make_profile <- function(yr, lin, param){
     filter(year(date) == yr,
            depth <= 500,
            line != lin) %>%
-    ggplot(aes(x = temperature, y = depth,
+    ggplot(aes(x = temperature, y = -depth,
                group = interaction(cast, quarter))) +
     geom_path(color = "black", alpha = 0.1) +
     geom_path(data = stations_in_line,
               color = "blue3",
               size = 2,
               alpha = 0.1) +
-    scale_y_continuous(trans = rev_sqrt) +
     facet_wrap(~ quarter,
                nrow = 1) +
     geom_hline(yintercept = 0) +
     labs(x = 'Temperature (˚C)',
-         y = 'Depth') +
+         y = 'Depth (m)') +
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 90, 
                                      size = 8, 
@@ -275,19 +273,18 @@ make_profile <- function(yr, lin, param){
     filter(year(date) == yr,
            depth <= 500,
            line != lin) %>%
-    ggplot(aes(x = salinity, y = depth,
+    ggplot(aes(x = salinity, y = -depth,
                group = interaction(cast, quarter))) +
     geom_path(color = "black", alpha = 0.1) +
     geom_path(data = stations_in_line,
               color = "hotpink3",
               size = 2,
               alpha = 0.1) +
-    scale_y_continuous(trans = rev_sqrt) +
     facet_wrap(~ quarter,
                nrow = 1) +
     geom_hline(yintercept = 0) +
     labs(x = 'Salinity (Practical Salinity Scale)',
-         y = 'Depth') +
+         y = 'Depth (m)') +
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 90, 
                                      size = 8, 
@@ -298,19 +295,18 @@ make_profile <- function(yr, lin, param){
     filter(year(date) == yr,
            depth <= 275,
            line != lin) %>%
-    ggplot(aes(x = chlorophyll, y = depth,
+    ggplot(aes(x = chlorophyll, y = -depth,
                group = interaction(cast, quarter))) +
     geom_path(color = "black", alpha = 0.1) +
     geom_path(data = stations_in_line %>% subset(depth <= 275),
               color = "springgreen4",
               size = 2,
               alpha = 0.1) +
-    scale_y_continuous(trans = rev_sqrt) +
     facet_wrap(~ quarter,
                nrow = 1) +
     geom_hline(yintercept = 0) +
     labs(x = 'Chlorophyll (micro grams/L seawater)',
-         y = 'Depth') +
+         y = 'Depth (m)') +
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 90, 
                                      size = 8, 
