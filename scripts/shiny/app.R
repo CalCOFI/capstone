@@ -414,14 +414,14 @@ server <- function(input, output, session) {
     oxy_ts_plot(as.integer(input$num_depths), as.character(daterange[1]), as.character(daterange[2]))
     }
     else{
-      if(input$param == "temp2"){
-        temp_ts_plot(input$yr, input$lin)
+      if(input$param2 == "temp2"){
+        temp_ts_plot(as.integer(input$num_depths), as.character(daterange[1]), as.character(daterange[2]))
       }else{
-        if(input$param == "sal2"){
-          sal_ts_plot(input$yr, input$lin)
+        if(input$param2 == "sal2"){
+          sal_ts_plot(as.integer(input$num_depths), as.character(daterange[1]), as.character(daterange[2]))
         }
         else{
-          cho_ts_plot(input$yr, input$lin)
+          cho_ts_plot(as.integer(input$num_depths), as.character(daterange[1]), as.character(daterange[2]))
         }
       }
     }
