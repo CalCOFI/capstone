@@ -15,6 +15,7 @@ load(bottle_rda)
 
 ui <- navbarPage(
   "CalCOFI", id="nav",
+  header = tags$head(includeHTML("google-analytics.html")),
   tabPanel(
     "Home",
     includeHTML("about.html")
